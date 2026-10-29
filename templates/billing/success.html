@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page max-w-lg py-16 text-center">
+  <h1 class="page-title">Thanks for subscribing!</h1>
+  {% if subscription %}
+    <p class="mt-3 text-ink-600">Your {{ subscription.plan.name }} plan is active.</p>
+    <a href="{% url 'cvs:tailor' %}" class="btn-primary mt-6">Start tailoring</a>
+  {% else %}
+    <p class="mt-3 text-ink-600">We're waiting for confirmation from our payment provider. This usually takes a few seconds.</p>
+    <div hx-get="{{ request.path }}" hx-trigger="every 3s" hx-select="main" hx-target="main" hx-swap="outerHTML"></div>
+    <a href="{% url 'billing:settings' %}" class="btn-secondary mt-6">Go to billing</a>
+  {% endif %}
+</div>
+{% endblock %}

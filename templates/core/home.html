@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% load ui static %}
+{% block content %}
+{# 1. Hero: aurora background, headline, floating live listings -------------------------------- #}
+<section class="relative isolate overflow-hidden">
+  <div class="pointer-events-none absolute inset-0 -z-10" aria-hidden="true">
+    <div class="absolute -left-40 -top-40 h-[520px] w-[520px] animate-aurora rounded-full bg-brand-300/40 blur-[110px]"></div>
+    <div class="absolute -right-32 top-10 h-[460px] w-[460px] animate-aurora-slow rounded-full bg-gold-300/40 blur-[110px]"></div>
+    <div class="absolute left-1/3 top-64 h-[380px] w-[380px] animate-aurora rounded-full bg-brand-500/20 blur-[120px]"></div>
+    <div class="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-canvas"></div>
+  </div>
+  <div class="container-page grid gap-14 pb-20 pt-16 sm:pt-24 lg:grid-cols-[1.15fr_.85fr] lg:items-center lg:pb-28">
+    <div class="animate-fade-up">
+      <p class="eyebrow"><span class="live-dot" aria-hidden="true"></span>{% if stats.total %}{{ stats.total }} open role{{ stats.total|pluralize }} right now{% else %}Live directory{% endif %}</p>
+      <h1 class="display mt-6">Remote AI training jobs for <span class="text-gradient">real experts.</span></h1>
+      <p class="lead mt-6 max-w-xl">AI companies pay professionals to write, check and grade model output in their own field. {% if stats.total %}<strong class="font-semibold text-ink-950">{{ stats.total }} role{{ stats.total|pluralize }}</strong> across {{ stats.companies }} compan{{ stats.companies|pluralize:"y,ies" }}, each with a direct link to apply.{% else %}New roles are added regularly, each with a direct link to apply.{% endif %}</p>
+      <div class="mt-9 flex flex-wrap gap-3">
+        <a href="{% url 'jobs:list' %}" class="btn-primary btn-lg">Explore {% if stats.total %}{{ stats.total }} {% endif %}open roles <span aria-hidden="true">→</span></a>
+        {% if USER_ACCOUNTS_ENABLED %}<a href="{% url 'cvs:builder' %}" class="btn-secondary btn-lg">Build your CV</a>{% else %}<a href="{% url 'jobs:platform_list' %}" class="btn-secondary btn-lg">Browse platforms</a>{% endif %}
+      </div>
+      <p class="mt-6 flex flex-wrap items-center gap-x-5 gap-y-2 text-[13px] text-ink-500">
+        <span class="inline-flex items-center gap-1.5"><svg class="h-4 w-4 text-emerald-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>No sign-up needed</span>
+        <span class="inline-flex items-center gap-1.5"><svg class="h-4 w-4 text-emerald-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>Apply on the company's own site</span>
+        <span class="inline-flex items-center gap-1.5"><svg class="h-4 w-4 text-emerald-600" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>Never a fee</span>
+      </p>
+    </div>
+
+    {% if jobs %}
+    <div class="relative hidden lg:block" aria-label="Newest listings">
+      {% for job in jobs|slice:":3" %}{% rate_label job as rate %}
+      <a href="{{ job.get_apply_url }}?from=home_hero" rel="nofollow noopener sponsored" target="_blank"
+         class="card-elevated group relative mb-4 flex items-center gap-4 p-4 no-underline animate-fade-up {% if forloop.counter == 2 %}ml-10{% elif forloop.counter == 3 %}ml-4{% endif %}"
+         style="animation-delay: {{ forloop.counter }}50ms">
+        {% include "partials/platform_logo.html" with p=job.platform %}
+        <div class="min-w-0 flex-1">
+          <p class="truncate text-[15px] font-semibold text-ink-950">{{ job.title }}</p>
+          <p class="mt-0.5 truncate text-[13px] text-ink-500">{{ job.display_company }}{% if rate %} · <span class="font-medium text-brand-700">{{ rate }}</span>{% endif %}</p>
+        </div>
+        <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-ink-100 text-ink-500 transition-all duration-200 group-hover:bg-ink-950 group-hover:text-white" aria-hidden="true">↗</span>
+      </a>
+      {% endfor %}
+      <div class="absolute -right-3 -top-5 animate-float rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-ink-700 shadow-soft-md"><span class="live-dot mr-1.5 align-middle"></span>Updated live</div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+{# 2. Platform strip (marquee) ---------------------------------------------------------------- #}
+{% if stats.by_company %}
+<section class="border-y border-ink-950/[.06] bg-white/60 py-6" aria-label="Platforms we list">
+  <div class="container-page flex flex-col gap-4 md:flex-row md:items-center md:gap-8">
+    <p class="shrink-0 text-xs font-semibold uppercase tracking-[.12em] text-ink-400">Roles from</p>
+    <div class="mask-fade-x min-w-0 flex-1 overflow-hidden">
+      <div class="flex w-max {% if stats.by_company|length > 3 %}animate-marquee pause-on-hover{% endif %}">
+        {% for pass in "ab" %}{% if forloop.first or stats.by_company|length > 3 %}
+        <ul class="flex shrink-0 items-center gap-3 pr-3" {% if forloop.counter == 2 %}aria-hidden="true"{% endif %}>
+          {% for row in stats.by_company %}
+          <li><a href="{% url 'jobs:list' %}?platform={{ row.platform__slug }}" class="pill" {% if forloop.parentloop.counter == 2 %}tabindex="-1"{% endif %}>{% if row.logo %}<img src="{{ row.logo }}" alt="" width="20" height="20" class="h-5 w-5 rounded-md object-contain">{% else %}<span class="h-1.5 w-1.5 rounded-full" style="background: {{ row.color }}"></span>{% endif %}{{ row.platform__name }} <span class="font-mono text-[11px] text-ink-400">{{ row.n }}</span></a></li>
+          {% endfor %}
+        </ul>
+        {% endif %}{% endfor %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# 3. Latest listings ---------------------------------------------------------------------------- #}
+{% if jobs %}
+<section class="container-page py-20">
+  <div class="reveal mb-6 flex items-end justify-between gap-3">
+    <div>
+      <p class="eyebrow-plain">Latest</p>
+      <h2 class="h-section mt-2">Newest listings</h2>
+    </div>
+    <a href="{% url 'jobs:list' %}" class="link-arrow text-sm">View all</a>
+  </div>
+  <div class="card reveal reveal-delay-1 overflow-hidden">{% for job in jobs %}{% include "jobs/_job_row.html" with from="home" %}{% endfor %}</div>
+</section>
+{% endif %}
+
+{# 4. Browse by field ------------------------------------------------------------------------ #}
+<section class="band">
+  <div class="container-page py-20">
+    <div class="reveal">
+      <p class="eyebrow-plain">By field</p>
+      <h2 class="h-section mt-2">Find work in your field</h2>
+      <p class="mt-3 max-w-2xl text-[15px] text-ink-500">Roles are grouped by the expertise they need. Pick the closest match to what you already do.</p>
+    </div>
+    {% if stats.by_category %}
+    <div class="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {% for c in stats.by_category|slice:":8" %}
+      <a href="{% if c.category__slug %}{% url 'jobs:category' c.category__slug %}{% else %}{% url 'jobs:list' %}{% endif %}" class="card-feature card-body group reveal {% cycle '' 'reveal-delay-1' 'reveal-delay-2' 'reveal-delay-3' %} flex flex-col no-underline">
+        <p class="text-[13px] font-medium tabular-nums text-brand-700">{{ c.n }} live role{{ c.n|pluralize }}</p>
+        <p class="mt-3 text-base font-semibold tracking-[-0.01em] text-ink-950">{{ c.category__name }}</p>
+        <p class="mt-1.5 line-clamp-2 text-[13px] leading-relaxed text-ink-500">{{ c.category__description }}</p>
+        <div class="mt-auto flex items-center justify-between gap-3 pt-6">
+          <div class="bar max-w-[7rem]" aria-hidden="true"><span style="width: {% widthratio c.n stats.total 100 %}%"></span></div>
+          <span class="link-arrow text-[13px]">Browse</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p class="mt-8 text-sm text-ink-500">No listings yet — check back soon.</p>
+    {% endif %}
+  </div>
+</section>
+
+{# 5. What the work is + stats ---------------------------------------------------------------- #}
+<section class="container-page py-20">
+  <div class="grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:items-center">
+    <div class="reveal">
+      <p class="eyebrow-plain">The work</p>
+      <h2 class="h-section mt-2">What this work actually is</h2>
+      <p class="mt-4 max-w-xl text-[16px] leading-relaxed text-ink-500">Companies building AI models hire people to teach, correct and grade them. A developer reviews generated code, a lawyer checks a model's contract reasoning, a translator rates its Urdu. What counts is depth in your own field — not prior AI experience.</p>
+    </div>
+    <dl class="grid grid-cols-2 gap-4">
+      <div class="card card-hover reveal p-6"><dt class="stat-label">Jobs listed here</dt><dd class="stat-value">{{ stats.total }}</dd></div>
+      <div class="card card-hover reveal reveal-delay-1 p-6"><dt class="stat-label">Distinct roles</dt><dd class="stat-value">{{ stats.titles }}</dd></div>
+      <div class="card card-hover reveal reveal-delay-2 p-6"><dt class="stat-label">Show a pay rate</dt><dd class="stat-value">{{ stats.with_rate|percent_of:stats.total }}%</dd></div>
+      <div class="card card-hover reveal reveal-delay-3 p-6"><dt class="stat-label">Remote</dt><dd class="stat-value">{{ stats.remote|percent_of:stats.total }}%</dd></div>
+    </dl>
+  </div>
+  <p class="mt-5 text-xs text-ink-400 lg:text-right">{{ stats.verified_open }} open listing{{ stats.verified_open|pluralize }} verified in the last {{ stats.verified_days }} days · {{ stats.closed }} closed or expired. These numbers count listings in this directory, not the number of open vacancies on each company's own platform.</p>
+</section>
+
+{# 6. CV Builder (later phase) -------------------------------------------------------------- #}
+{% if USER_ACCOUNTS_ENABLED %}
+<section class="container-page pb-20" id="cv-builder">
+  <div class="reveal relative overflow-hidden rounded-4xl bg-gradient-to-br from-ink-950 to-brand-950 px-6 py-12 sm:px-12 sm:py-16">
+    <div class="absolute -right-24 -top-24 h-72 w-72 animate-aurora rounded-full bg-brand-500/30 blur-[90px]" aria-hidden="true"></div>
+    <p class="eyebrow-plain text-brand-300">CV Builder</p>
+    <h2 class="mt-3 max-w-xl text-[28px] font-semibold leading-tight tracking-[-0.035em] text-white sm:text-[36px]">Apply with a CV that fits the role.</h2>
+    <p class="mt-4 max-w-xl text-[16px] leading-relaxed text-ink-300">Save your experience once, then create a clean, ATS-friendly CV — or one tailored to a job description. It only rewords what you gave it.</p>
+    <div class="mt-8 flex flex-wrap gap-3">
+      <a href="{% url 'cvs:builder' %}" class="btn-white btn-lg">Open CV Builder</a>
+      {% if not user.is_authenticated %}<a href="{% url 'accounts:register' %}" class="btn-on-dark btn-lg">Create a free account</a>{% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{# 7. Straight answers ----------------------------------------------------------------------- #}
+<section class="container-page pb-20">
+  <div class="reveal">
+    <p class="eyebrow-plain">FAQ</p>
+    <h2 class="h-section mt-2">Straight answers</h2>
+  </div>
+  <dl class="qa reveal reveal-delay-1 mt-8">
+    <div><dt>Are you the employer?</dt><dd>No. You apply on the company's own site and they run selection, contracts and pay. We're an independent directory.</dd></div>
+    <div><dt>Do I need AI experience?</dt><dd>Usually not. Companies are buying expertise in your field; familiarity with AI tools helps but is rarely required.</dd></div>
+    <div><dt>What does it pay?</dt><dd>It varies by company, field and seniority. Where a rate is published we show it on the listing{% if stats.total %} — {{ stats.with_rate|percent_of:stats.total }}% of current listings have one{% endif %}.</dd></div>
+    <div><dt>Is there a fee to apply?</dt><dd>Never. Treat any request for payment in exchange for a job as a warning sign.</dd></div>
+    <div><dt>Are the listings checked?</dt><dd>Each listing shows when it was last verified. Closed roles are removed from the directory.</dd></div>
+    {% if USER_ACCOUNTS_ENABLED %}<div><dt>What does the CV Builder cost?</dt><dd>Browsing and saving jobs is free. Each generated CV uses one credit; editing and downloads are free, and failed generations are refunded.</dd></div>{% else %}<div><dt>Do I need an account?</dt><dd>No. Browse, search and open every listing without signing up; you apply directly on the company's site.</dd></div>{% endif %}
+    <div><dt>Do you earn from referrals?</dt><dd>Some Apply links are referral links and are labelled as such. They never cost you anything. <a href="{% url 'core:referral_disclosure' %}">How it works</a></dd></div>
+  </dl>
+</section>
+
+{# 8. Dark call to action with newsletter ------------------------------------------------------- #}
+<section class="container-page">
+  <div class="reveal relative isolate overflow-hidden rounded-4xl bg-gradient-to-br from-ink-950 via-brand-950 to-brand-900 px-6 py-14 sm:px-12 sm:py-16">
+    <div class="absolute -left-20 -top-28 -z-10 h-80 w-80 animate-aurora rounded-full bg-brand-500/30 blur-[100px]" aria-hidden="true"></div>
+    <div class="absolute -bottom-32 right-0 -z-10 h-80 w-80 animate-aurora-slow rounded-full bg-gold-400/20 blur-[100px]" aria-hidden="true"></div>
+    <div class="grid gap-10 lg:grid-cols-[1fr_26rem] lg:items-center">
+      <div>
+        <img src="{% static 'img/orexia-mark.png' %}" alt="" width="48" height="48" class="h-12 w-12">
+        <h2 class="mt-6 max-w-lg text-[28px] font-semibold leading-tight tracking-[-0.035em] text-white sm:text-[36px]">Your expertise is what AI companies are hiring for.</h2>
+        <p class="mt-4 max-w-lg text-[16px] leading-relaxed text-ink-300">Browse every open role, filter by where you live, and apply directly on the company's site.</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="{% url 'jobs:list' %}" class="btn-white btn-lg">Explore jobs <span aria-hidden="true">→</span></a>
+          <a href="{% url 'jobs:platform_list' %}" class="btn-on-dark btn-lg">Compare platforms</a>
+        </div>
+      </div>
+      <div class="rounded-2xl border border-white/10 bg-white/[.06] p-5 backdrop-blur [&_.input]:border-white/15 [&_.input]:bg-white/10 [&_.input]:text-white [&_.input]:placeholder:text-ink-400 [&_label]:text-ink-300 [&_.btn-dark]:bg-white [&_.btn-dark]:text-ink-950 [&_.btn-dark:hover]:bg-ink-100 [&_.btn-dark:hover]:text-ink-950">
+        <p class="font-semibold text-white">New roles by email</p>
+        <p class="mt-1 text-sm text-ink-300">A short weekly digest. Double opt-in; unsubscribe any time.</p>
+        <div class="mt-4">{% include "partials/newsletter_form.html" with form=newsletter_form %}</div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

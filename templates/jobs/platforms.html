@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block content %}
+<div class="container-page py-12 sm:py-16">
+  <p class="eyebrow-plain">Platforms</p>
+  <h1 class="page-title mt-2">Companies hiring AI trainers</h1>
+  <p class="mt-3 max-w-3xl text-ink-500">Companies that hire remote contributors for AI training, evaluation and data work. Opportunities and eligibility change frequently — inclusion here doesn't mean a platform is currently hiring in your country.</p>
+  <div class="stagger mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    {% for p in platforms %}
+    <article class="card-feature card-body group relative flex flex-col">
+      <div class="flex items-center gap-3">{% include "partials/platform_logo.html" with p=p size="h-12 w-12" %}
+      <h2 class="font-semibold"><a href="{{ p.get_absolute_url }}" class="text-ink-950 no-underline after:absolute after:inset-0 after:content-['']">{{ p.name }}</a></h2></div>
+      {% if p.work_types %}<p class="mt-1 text-xs text-ink-500">{{ p.work_types }}</p>{% endif %}
+      <p class="mt-3 line-clamp-3 text-sm text-ink-600">{{ p.description }}</p>
+      <div class="mt-auto flex items-center justify-between pt-4 text-sm">
+        <span class="badge-brand">{{ p.open_jobs }} open listing{{ p.open_jobs|pluralize }}</span>
+        <span class="link-arrow" aria-hidden="true">View</span>
+      </div>
+    </article>
+    {% empty %}
+    <p class="text-ink-600">No platforms yet.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block content %}
+<div class="container-page py-12">
+  <div class="mx-auto max-w-2xl text-center">
+    <h1 class="text-3xl font-bold sm:text-4xl">Simple, honest pricing</h1>
+    <p class="mt-3 text-ink-600">Job discovery is free for everyone. Upgrade for more AI tailoring, DOCX exports and detailed fit analysis. Cancel any time.</p>
+  </div>
+  {% if not billing_ready %}<p class="mx-auto mt-6 max-w-xl rounded-xl border border-amber-200 bg-amber-50 p-3 text-center text-sm text-amber-900">Online payments aren't enabled on this server yet. Paid plans will be available soon.</p>{% endif %}
+  <div class="mt-10 grid gap-6 lg:grid-cols-3">
+    {% for plan in plans %}
+    <div class="card card-body flex flex-col {% if plan.highlight %}ring-2 ring-brand-500{% endif %}">
+      <div class="flex items-center justify-between"><h2 class="text-lg font-bold">{{ plan.name }}</h2>{% if plan.highlight %}<span class="badge-brand">Most popular</span>{% endif %}</div>
+      <p class="mt-1 text-sm text-ink-500">{{ plan.tagline }}</p>
+      <p class="mt-5"><span class="text-4xl font-extrabold">{{ plan.price_display }}</span>{% if not plan.is_free %}<span class="text-ink-500"> / {{ plan.interval }}</span>{% endif %}</p>
+      {% if plan.savings_pct %}<p class="mt-1 text-sm font-medium text-emerald-700">Save {{ plan.savings_pct }}% (${{ plan.savings_cents|cents }} a year) vs monthly · ${{ plan.monthly_equivalent_cents|cents }}/month equivalent</p>{% endif %}
+      <ul class="mt-6 flex-1 space-y-2 text-sm">{% for f in plan.marketing_features %}<li class="flex gap-2"><span class="text-emerald-600" aria-hidden="true">✓</span>{{ f }}</li>{% endfor %}</ul>
+      <div class="mt-8">
+        {% if current_plan and current_plan.code == plan.code %}
+          <span class="btn-secondary w-full cursor-default">Your current plan</span>
+        {% elif plan.is_free %}
+          {% if not user.is_authenticated %}<a href="{% url 'accounts:register' %}" class="btn-secondary w-full">Get started free</a>{% endif %}
+        {% elif not user.is_authenticated %}
+          <a href="{% url 'accounts:register' %}" class="btn-primary w-full">Sign up to subscribe</a>
+        {% elif current_plan and not current_plan.is_free %}
+          <form method="post" action="{% url 'billing:portal' %}">{% csrf_token %}<button class="btn-secondary w-full" type="submit" {% if not billing_ready %}disabled{% endif %}>Switch in billing portal</button></form>
+        {% else %}
+          <form method="post" action="{% url 'billing:checkout' plan.code %}">{% csrf_token %}<button class="btn-primary w-full" type="submit" {% if not billing_ready or not plan.provider_price_id %}disabled{% endif %}>Subscribe</button></form>
+          {% if billing_ready and not plan.provider_price_id %}<p class="mt-1 text-center text-xs text-ink-500">Coming soon</p>{% endif %}
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  <p class="mx-auto mt-8 max-w-2xl text-center text-xs text-ink-500">Prices in USD. Taxes may apply. Annual plans get the same monthly generation allowance as monthly plans, reset each month from your subscription date. Prices and allowances may change for future billing periods with notice. Payments are processed securely by Stripe — we never see or store your card details.</p>
+</div>
+{% endblock %}

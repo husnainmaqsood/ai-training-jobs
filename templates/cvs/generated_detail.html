@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block content %}
+<div class="container-page py-8">
+  <nav class="mb-4 text-sm"><a href="{% url 'cvs:history' %}">History</a></nav>
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="page-title">{{ gcv.title }}</h1>
+      <p class="muted">Created {{ gcv.created_at|date:"d M Y H:i" }} from “{{ gcv.request.master_cv.title }}”{% if gcv.is_user_edited %} · edited by you{% endif %}</p>
+    </div>
+    <div class="flex flex-wrap gap-2">
+      {% if plan.can_edit_generated %}<a href="{% url 'cvs:generated_edit' gcv.public_id %}" class="btn-secondary">Edit</a>{% endif %}
+      {% if plan.can_export_pdf %}<a href="{% url 'cvs:generated_download' gcv.public_id 'pdf' %}" class="btn-primary">Download PDF</a>{% endif %}
+      {% if plan.can_export_docx %}<a href="{% url 'cvs:generated_download' gcv.public_id 'docx' %}" class="btn-primary">Download DOCX</a>
+      {% else %}<a href="{% url 'billing:pricing' %}" class="btn-secondary" title="Premium feature">DOCX · Premium</a>{% endif %}
+      <form method="post" action="{% url 'cvs:generation_retry' gcv.request.public_id %}" data-confirm="Generate a completely new version? This uses 1 generation.">{% csrf_token %}<button class="btn-ghost" type="submit">New version</button></form>
+    </div>
+  </div>
+
+  <div class="mt-6 grid gap-6 xl:grid-cols-[1fr_24rem]">
+    <section class="card overflow-hidden">
+      <div class="flex items-center justify-between border-b border-line px-5 py-3 text-sm">
+        <span class="font-semibold">Preview</span>
+        <span class="text-xs text-ink-500">{% if regen_left %}{{ regen_left }} section regeneration{{ regen_left|pluralize }} left{% elif not plan.section_regenerations_per_cv %}Section regeneration: Premium{% else %}No section regenerations left{% endif %}</span>
+      </div>
+      {% include "cvs/_cv_preview.html" with editable=True %}
+    </section>
+
+    <aside class="space-y-4">
+      <section class="card card-body">
+        <h2 class="section-title">Job fit</h2>
+        {% if gcv.match_score is not None %}
+        <p class="mt-2 text-3xl font-bold">{{ gcv.match_score }}%</p>
+        <p class="text-xs text-ink-500">Estimated requirement coverage — <strong>not</strong> an employer ATS score or a prediction of being hired. Calculated as a weighted share of requirements your CV supports (required ×2, others ×1; partial = half).</p>
+        {% endif %}
+        <div class="mt-3 flex gap-2 text-xs"><span class="badge-green">{{ fit.counts.supported|default:0 }} supported</span><span class="badge-amber">{{ fit.counts.partial|default:0 }} partial</span><span class="badge-red">{{ fit.counts.missing|default:0 }} missing</span></div>
+        {% if detailed %}
+          <ul class="mt-4 space-y-3 text-sm">
+          {% for a in fit.assessments %}
+            <li class="rounded-lg border border-line p-2">
+              <div class="flex items-start justify-between gap-2"><span>{{ a.requirement }}</span><span class="{{ a.support|support_badge }} shrink-0">{{ a.support }}</span></div>
+              <p class="text-xs text-ink-500">{{ a.importance }}{% if a.note %} · {{ a.note }}{% endif %}</p>
+              {% for q in a.evidence %}<p class="mt-1 border-l-2 border-emerald-300 pl-2 text-xs italic text-ink-600">“{{ q }}”</p>{% endfor %}
+            </li>
+          {% endfor %}
+          </ul>
+          {% if fit.emphasize %}<h3 class="mt-5 text-sm font-semibold">Emphasised</h3><ul class="mt-1 list-disc pl-5 text-sm">{% for x in fit.emphasize %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+          {% if fit.recommendations %}<h3 class="mt-5 text-sm font-semibold">Recommendations</h3><ul class="mt-1 list-disc pl-5 text-sm">{% for x in fit.recommendations %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+          {% if fit.potential_inconsistencies %}<h3 class="mt-5 text-sm font-semibold text-amber-800">Possible inconsistencies in your CV</h3><ul class="mt-1 list-disc pl-5 text-sm">{% for x in fit.potential_inconsistencies %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+          {% if fit.clarifying_questions %}<h3 class="mt-5 text-sm font-semibold">Questions that could strengthen your CV</h3><ul class="mt-1 list-disc pl-5 text-sm">{% for x in fit.clarifying_questions %}<li>{{ x }}</li>{% endfor %}</ul>
+            <p class="mt-1 text-xs text-ink-500">If the answer is yes, add it to your master CV and generate again.</p>{% endif %}
+        {% else %}
+          {% if fit.missing %}<h3 class="mt-4 text-sm font-semibold">Top gaps</h3><ul class="mt-1 list-disc pl-5 text-sm">{% for x in fit.missing %}<li>{{ x }}</li>{% endfor %}</ul>{% endif %}
+          <div class="mt-4 rounded-xl bg-brand-50 p-3 text-xs text-brand-900">Premium shows evidence from your CV for every requirement, recommendations and possible inconsistencies. <a href="{% url 'billing:pricing' %}">Upgrade</a></div>
+        {% endif %}
+      </section>
+
+      <section class="card card-body">
+        <h2 class="section-title">Fact check</h2>
+        {% if report.passed_without_changes and not report.edit_warnings %}
+          <p class="mt-2 text-sm text-emerald-700">✓ Every rewritten line passed the check against your original CV.</p>
+        {% else %}
+          {% if report.removed_skills %}<p class="mt-2 text-sm"><strong>Skills removed</strong> (not evidenced in your CV): {{ report.removed_skills|join:", " }}</p>{% endif %}
+          {% if report.rejected_text %}<p class="mt-3 text-sm font-semibold">Rejected AI suggestions</p>
+            <ul class="mt-1 space-y-2 text-xs">{% for r in report.rejected_text %}<li class="rounded-lg bg-ink-50 p-2"><span class="text-ink-500">{{ r.section }}:</span> “{{ r.text }}” <span class="text-red-700">— {{ r.reasons|join:"; " }}</span></li>{% endfor %}</ul>{% endif %}
+          {% if report.reverted_items %}<p class="mt-3 text-xs text-ink-600">Original bullets kept for: {{ report.reverted_items|join:", " }}</p>{% endif %}
+          {% for n in report.notes %}<p class="mt-2 text-xs text-ink-600">{{ n }}</p>{% endfor %}
+          {% if report.edit_warnings %}<p class="mt-3 text-sm font-semibold text-amber-800">Your edits</p><ul class="list-disc pl-5 text-xs">{% for w in report.edit_warnings %}<li>{{ w }}</li>{% endfor %}</ul>{% endif %}
+        {% endif %}
+        <p class="mt-3 text-xs text-ink-500">Always review your CV before sending it. You are responsible for its accuracy.</p>
+      </section>
+      {% if gcv.request.job %}
+      <section class="card card-body text-sm">
+        <p>Ready? <a href="{% url 'referrals:go_job' gcv.request.job.pk %}?from=tailored_cv" target="_blank" rel="nofollow noopener sponsored">Apply on {{ gcv.request.job.platform.name }} ↗</a></p>
+        <form method="post" action="{% url 'tracker:track' gcv.request.job.pk %}" class="mt-2">{% csrf_token %}<button class="btn-secondary btn-sm" type="submit">Track this application</button></form>
+      </section>
+      {% endif %}
+    </aside>
+  </div>
+</div>
+{% endblock %}

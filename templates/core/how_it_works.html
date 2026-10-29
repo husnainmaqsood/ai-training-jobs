@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page max-w-3xl py-12">
+  <h1 class="page-title">How it works</h1>
+  <ol class="mt-8 space-y-8">
+    <li class="card card-body">
+      <h2 class="font-semibold">1. Find a job you're eligible for</h2>
+      <p class="mt-2 text-sm text-ink-600">Search by skill, category, platform, pay and — most importantly — your country. Each listing is labelled
+        <span class="badge-green">Worldwide (verified)</span>, <span class="badge-sky">specific countries</span> or
+        <span class="badge-amber">eligibility not verified</span>. Listings show a "last verified" date, and expired or broken listings are removed.</p>
+    </li>
+    <li class="card card-body">
+      <h2 class="font-semibold">2. Upload your master CV once</h2>
+      <p class="mt-2 text-sm text-ink-600">Upload a PDF or DOCX, or paste text. We keep your original file untouched and extract its text so you can check it.</p>
+    </li>
+    <li class="card card-body">
+      <h2 class="font-semibold">3. Tailor it to the job</h2>
+      <p class="mt-2 text-sm text-ink-600">The AI compares the job's requirements to your actual experience, then rewrites your summary, skills and bullet points to emphasise what's relevant.
+        It references your existing roles by ID and cannot change employers, titles, dates or degrees. A second, non-AI fact check rejects any new numbers, skills or technologies that aren't in your CV — and tells you what it rejected.</p>
+    </li>
+    <li class="card card-body">
+      <h2 class="font-semibold">4. Review the fit analysis</h2>
+      <p class="mt-2 text-sm text-ink-600">See which requirements your CV supports (with quotes from your CV as evidence), which are partial, and which are missing. The coverage estimate is a simple weighted count — it is <strong>not</strong> an employer ATS score or a prediction of being hired.</p>
+    </li>
+    <li class="card card-body">
+      <h2 class="font-semibold">5. Edit, download, apply, track</h2>
+      <p class="mt-2 text-sm text-ink-600">Edit any wording, download an ATS-friendly PDF or DOCX, apply on the employer's official site, and record progress in your tracker.</p>
+    </li>
+  </ol>
+  <div class="mt-10 flex gap-3"><a href="{% url 'accounts:register' %}" class="btn-primary">Create a free account</a><a href="{% url 'jobs:list' %}" class="btn-secondary">Browse jobs</a></div>
+</div>
+{% endblock %}

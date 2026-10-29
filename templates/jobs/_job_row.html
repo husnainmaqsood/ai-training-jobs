@@ -1,0 +1,30 @@
+{% load ui %}{% rate_label job as rate %}{# The whole row opens the job's own link on the hiring platform (via the click-logging redirect). #}
+<article class="list-row group relative items-start hover:bg-brand-50/40">
+  {% include "partials/platform_logo.html" with p=job.platform %}
+  <div class="min-w-0 flex-1">
+    <div class="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between sm:gap-6">
+      <div class="min-w-0">
+        <h3 class="text-base font-semibold leading-snug tracking-[-0.01em] text-ink-950">
+          <a href="{{ job.get_apply_url }}?from={{ from|default:'job_list' }}" class="inline-flex items-baseline gap-1.5 text-ink-950 no-underline after:absolute after:inset-0 after:content-['']" rel="nofollow noopener sponsored" target="_blank">{{ job.title }}<svg class="h-3.5 w-3.5 shrink-0 translate-y-0.5 text-ink-300 transition-[color,transform] group-hover:-translate-y-0 group-hover:translate-x-0.5 group-hover:text-ink-950" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 14 14 6M7 6h7v7"/></svg><span class="sr-only">— apply on {{ job.platform.name }} (opens in a new tab)</span></a>
+        </h3>
+        <p class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[13px] text-ink-500">
+          <span class="font-medium text-ink-700">{{ job.display_company }}</span>
+          <span class="text-ink-300" aria-hidden="true">/</span><span>{{ job.get_employment_type_display }}</span>
+          <span class="text-ink-300" aria-hidden="true">/</span>{% include "jobs/_eligibility_badge.html" with plain=True %}
+          {% if job.is_demo %}<span class="badge-red">Demo</span>{% endif %}
+        </p>
+      </div>
+      {% if rate %}<span class="rate mt-1 self-start sm:mt-0.5">{{ rate }}</span>{% endif %}
+    </div>
+    <div class="mt-2.5 flex flex-wrap items-center justify-between gap-2 text-xs text-ink-400">
+      <span class="flex items-center gap-3">
+        {% comment %} {% if job.published_at %}<span>{{ job.published_at|ago }} ago</span>{% endif %} {% endcomment %}
+        {% if job.last_verified_at %}<span class="inline-flex items-center gap-1 text-emerald-700"><svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M16.7 5.3a1 1 0 0 1 0 1.4l-8 8a1 1 0 0 1-1.4 0l-4-4a1 1 0 1 1 1.4-1.4L8 12.6l7.3-7.3a1 1 0 0 1 1.4 0Z" clip-rule="evenodd"/></svg>Verified {{ job.last_verified_at|date:"j M" }}</span>{% endif %}
+      </span>
+      <span class="flex items-center gap-4">
+        {% comment %} <a href="{{ job.get_absolute_url }}" class="relative z-10 text-ink-500 no-underline hover:text-ink-950">Details</a> {% endcomment %}
+        <span class="inline-flex items-center gap-1 rounded-full border-[1.5px] border-line-strong px-3 py-1 font-semibold text-ink-800 transition-all duration-200 group-hover:border-ink-950 group-hover:bg-ink-950 group-hover:text-white" aria-hidden="true">Apply on {{ job.platform.name }} <span class="transition-transform duration-150 group-hover:translate-x-0.5">→</span></span>
+      </span>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="container-page prose prose-stone max-w-3xl py-12">
+  <h1>Referral &amp; affiliate disclosure</h1>
+  <p>Some platforms listed on {{ SITE_NAME }} run referral or affiliate programs. When we participate in an approved program, the application or platform link may be a referral link, and we may receive a commission if you sign up or complete work. This never costs you anything and never changes the pay you receive.</p>
+  <ul>
+    <li>Referral links are labelled <span class="not-prose badge-amber">Referral link</span> next to the apply button.</li>
+    <li>We only use referral links from programs we've verified and that permit this kind of promotion. Otherwise we link directly to the official application page.</li>
+    <li>Referral participation never affects which listings we show or how they're ranked.</li>
+    <li>We record a click (listing, link type, time and a daily-rotating anonymous hash) so we can reconcile partner reports. We don't share your personal data with platforms when you click.</li>
+  </ul>
+  <p>Questions? <a href="{% url 'core:contact' %}">Contact us</a>.</p>
+</article>
+{% endblock %}

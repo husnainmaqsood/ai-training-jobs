@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page max-w-2xl py-8">
+  <nav class="mb-4 text-sm"><a href="{% url 'tracker:board' %}">Tracker</a></nav>
+  <h1 class="page-title">{{ title }}</h1>
+  <form method="post" class="card card-body mt-6 space-y-4">{% csrf_token %}
+    {% include "partials/form_fields.html" %}
+    <button class="btn-primary" type="submit">Save</button>
+  </form>
+</div>
+{% endblock %}

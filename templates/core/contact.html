@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page max-w-xl py-12">
+  <h1 class="page-title">Contact us</h1>
+  <p class="mt-2 text-ink-600">Questions, listing corrections, partnership or privacy requests. You can also email <a href="mailto:{{ CONTACT_EMAIL }}">{{ CONTACT_EMAIL }}</a>.</p>
+  <form method="post" class="card card-body mt-6 space-y-4">{% csrf_token %}
+    {% include "partials/form_fields.html" with form=form %}
+    <button class="btn-primary" type="submit">Send message</button>
+  </form>
+</div>
+{% endblock %}

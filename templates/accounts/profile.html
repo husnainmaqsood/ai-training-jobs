@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page py-8 sm:py-10">
+  <div class="mb-8">
+    <h1 class="page-title">Your profile</h1>
+    <p class="mt-1.5 max-w-2xl text-[15px] text-ink-500">Saved once and reused by the CV builder. Generated CVs only include what you enter here.</p>
+  </div>
+
+  <div class="grid gap-8 lg:grid-cols-[1fr_18rem]">
+    <form method="post" class="min-w-0 space-y-6" novalidate>
+      {% if form.errors or formset.total_error_count %}<div class="alert-error" role="alert">Please fix the highlighted fields below.</div>{% endif %}
+
+      <section class="card" aria-labelledby="h-personal">
+        <div class="card-header"><h2 id="h-personal" class="section-title">Personal details</h2>{% csrf_token %}<input type="hidden" name="next" value="{{ request.GET.next }}"></div>
+        <div class="card-body grid gap-4 sm:grid-cols-2">
+          {% for field in form %}{% if field.name in "full_name headline phone location links country" %}
+          <div class="{% if field.name == 'headline' or field.name == 'links' %}sm:col-span-2{% endif %}">
+            <label class="label" for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="font-normal text-ink-400">(optional)</span>{% endif %}</label>
+            {{ field }}
+            {% if field.help_text %}<p class="help">{{ field.help_text }}</p>{% endif %}
+            {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+          </div>
+          {% endif %}{% endfor %}
+          <div class="sm:col-span-2"><p class="label">Email</p><p class="text-sm text-ink-700">{{ user.email }} {% if user.email_verified %}<span class="badge-green ml-1">Verified</span>{% else %}<span class="badge-amber ml-1">Not verified</span>{% endif %}</p></div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="h-exp">
+        <div class="card-header">
+          <div><h2 id="h-exp" class="section-title">Work experience</h2><p class="mt-0.5 text-[13px] text-ink-500">Most recent first. Company names, titles and dates are copied exactly into your CV.</p></div>
+        </div>
+        {{ formset.management_form }}
+        {% for e in formset.non_form_errors %}<p class="error px-5 pt-3">{{ e }}</p>{% endfor %}
+        <div id="exp-forms">
+          {% for f in formset %}{% include "accounts/_experience_form.html" %}{% endfor %}
+        </div>
+        <template id="exp-template">{% with f=formset.empty_form %}{% include "accounts/_experience_form.html" %}{% endwith %}</template>
+        <div class="border-t border-line px-5 py-3">
+          <button type="button" class="btn-ghost btn-sm -ml-2" data-formset-add="exp">+ Add a role</button>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="h-extra">
+        <div class="card-header"><h2 id="h-extra" class="section-title">Skills, education &amp; extras</h2></div>
+        <div class="card-body space-y-4">
+          {% for field in form %}{% if field.name in "skills_text education additional_info" %}
+          <div>
+            <label class="label" for="{{ field.id_for_label }}">{{ field.label }} <span class="font-normal text-ink-400">(optional)</span></label>
+            {{ field }}
+            {% if field.help_text %}<p class="help">{{ field.help_text }}</p>{% endif %}
+            {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+          </div>
+          {% endif %}{% endfor %}
+        </div>
+      </section>
+
+      <div class="sticky bottom-0 -mx-4 flex items-center justify-between gap-3 border-t border-line bg-canvas/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-xl sm:border sm:bg-white sm:px-5">
+        <p class="hidden text-[13px] text-ink-500 sm:block">Your details are private and only used to build your CVs.</p>
+        <button class="btn-primary ml-auto" type="submit">Save profile</button>
+      </div>
+    </form>
+
+    <aside class="space-y-4">
+      <div class="card card-body">
+        <p class="stat-label">CV credits</p>
+        <p class="stat-value">{{ credits }}</p>
+        <a href="{% url 'cvs:builder' %}" class="btn-dark mt-4 w-full">Open CV Builder</a>
+        <a href="{% url 'cvs:builder' %}#credits" class="mt-2 block text-center text-[13px]">Buy credits</a>
+      </div>
+      <nav class="card divide-y divide-line text-sm" aria-label="Account">
+        <a href="{% url 'jobs:saved' %}" class="flex items-center justify-between px-5 py-3 text-ink-700 no-underline hover:bg-ink-50">Saved jobs <span class="text-ink-400">{{ saved_count }}</span></a>
+        <a href="{% url 'tracker:board' %}" class="flex items-center justify-between px-5 py-3 text-ink-700 no-underline hover:bg-ink-50">Application notes <span class="text-ink-400">{{ applications_count }}</span></a>
+        <a href="{% url 'accounts:password_change' %}" class="block px-5 py-3 text-ink-700 no-underline hover:bg-ink-50">Change password</a>
+        <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="block w-full px-5 py-3 text-left text-ink-700 hover:bg-ink-50" type="submit">Log out</button></form>
+      </nav>
+      <div class="px-1 text-[13px] text-ink-500">
+        <p>AI processing consent: {% if user.profile.ai_processing_consent_at %}given {{ user.profile.ai_processing_consent_at|date:"j M Y" }}{% else %}not given yet{% endif %}.</p>
+        <p class="mt-3"><a href="{% url 'accounts:delete' %}" class="text-red-700">Delete my account</a></p>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

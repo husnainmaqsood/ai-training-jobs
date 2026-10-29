@@ -1,0 +1,17 @@
+# Direct dependencies. Pinned, resolved versions live in requirements.txt (pip freeze).
+Django>=5.2,<6
+psycopg[binary]>=3.2
+dj-database-url
+python-dotenv
+openai>=2
+stripe>=12
+pypdf>=5
+python-docx>=1.1
+reportlab>=4
+openpyxl>=3.1
+celery>=5.4
+redis>=5
+gunicorn>=23
+whitenoise>=6.7
+pydantic>=2.9
+requests>=2.32

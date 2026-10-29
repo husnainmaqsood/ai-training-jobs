@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page max-w-3xl py-12">
+  <h1 class="page-title">Frequently asked questions</h1>
+  <div class="mt-8 space-y-4">
+    <details class="card card-body" open><summary class="cursor-pointer font-semibold">Are these real jobs?</summary>
+      <p class="mt-2 text-sm text-ink-600">Listings come from official employer job APIs, authorized feeds and admin-reviewed manual entries. We never invent listings, pay or referral links. Each listing shows its source and when it was last verified. If something looks wrong, use "Report this listing".</p></details>
+    <details class="card card-body"><summary class="cursor-pointer font-semibold">What does "Worldwide" mean?</summary>
+      <p class="mt-2 text-sm text-ink-600">Only that the source explicitly says the role is open worldwide (minus any listed exclusions). "Remote" alone is labelled "eligibility not verified" — always check the official listing.</p></details>
+    {% if USER_ACCOUNTS_ENABLED %}
+    <details class="card card-body"><summary class="cursor-pointer font-semibold">Will the AI add skills I don't have?</summary>
+      <p class="mt-2 text-sm text-ink-600">No. It is instructed not to, it cannot output employers, titles or dates at all, and an independent fact check removes any skill, technology or number that doesn't appear in your original CV. Missing requirements are shown to you as gaps instead.</p></details>
+    <details class="card card-body"><summary class="cursor-pointer font-semibold">What happens to my CV data?</summary>
+      <p class="mt-2 text-sm text-ink-600">Your CV is stored privately and only you can access it. When you request tailoring, the CV text (with your email and phone number removed) and the job description are sent to our AI provider for processing. We don't use your CV to train models. You can delete CVs or your whole account at any time. See the <a href="{% url 'core:privacy' %}">privacy policy</a>.</p></details>
+    <details class="card card-body"><summary class="cursor-pointer font-semibold">How do generation limits work?</summary>
+      <p class="mt-2 text-sm text-ink-600">Each full tailoring run uses one generation from your plan's allowance when you start it. If it fails for a technical reason, it is refunded automatically. Free allowances reset each calendar month (UTC); Premium allowances reset with your billing period.</p></details>
+    {% endif %}
+    <details class="card card-body"><summary class="cursor-pointer font-semibold">Do you apply to jobs for me?</summary>
+      <p class="mt-2 text-sm text-ink-600">No. "Apply" takes you to the official application page.{% if USER_ACCOUNTS_ENABLED %} Your tracker only records what you tell it.{% endif %}</p></details>
+    <details class="card card-body"><summary class="cursor-pointer font-semibold">Do you earn money from application links?</summary>
+      <p class="mt-2 text-sm text-ink-600">Some platforms run referral programs. Where we've joined one, the link is clearly marked and we may earn a commission at no cost to you. See our <a href="{% url 'core:referral_disclosure' %}">referral disclosure</a>.</p></details>
+    {% if USER_ACCOUNTS_ENABLED %}
+    <details class="card card-body"><summary class="cursor-pointer font-semibold">How do I cancel Premium?</summary>
+      <p class="mt-2 text-sm text-ink-600">From Billing, choose "Cancel at period end" or open the billing portal. You keep Premium until the end of the period you've paid for.</p></details>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

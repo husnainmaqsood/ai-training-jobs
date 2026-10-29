@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page py-8">
+  <nav class="mb-4 text-sm"><a href="{% url 'cvs:workspace' %}">CV workspace</a></nav>
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div><h1 class="page-title">{{ cv.title }}</h1>
+      <p class="muted">{{ cv.get_file_type_display }}{% if cv.original_filename %} · {{ cv.original_filename }}{% endif %} · {{ cv.get_parse_status_display }}</p></div>
+    <div class="flex gap-2">
+      {% if cv.original_file %}<a href="{% url 'cvs:master_download' cv.public_id %}" class="btn-secondary">Download original</a>{% endif %}
+      <a href="{% url 'cvs:tailor' %}" class="btn-primary">✨ Tailor this CV</a>
+    </div>
+  </div>
+  <div class="mt-6 grid gap-6 lg:grid-cols-2">
+    <form method="post" class="card card-body space-y-4">{% csrf_token %}
+      <h2 class="section-title">Extracted text</h2>
+      <p class="text-xs text-ink-500">Check this matches your CV. Fix extraction mistakes here — tailoring uses this text. Your uploaded file is never modified.</p>
+      {% include "partials/form_fields.html" %}
+      <button class="btn-primary" type="submit">Save text</button>
+    </form>
+    <section class="card card-body">
+      <h2 class="section-title">Detected structure</h2>
+      <p class="text-xs text-ink-500">{% if cv.parse_status == "structured" %}Structured by AI on first tailoring.{% else %}Preview from our basic parser. The AI re-reads your CV more accurately the first time you tailor it.{% endif %}</p>
+      {% if cv.parse_error %}<p class="mt-2 text-xs text-amber-700">{{ cv.parse_error }}</p>{% endif %}
+      <dl class="mt-4 space-y-4 text-sm">
+        {% if structured.full_name %}<div><dt class="font-semibold">Name</dt><dd>{{ structured.full_name }}</dd></div>{% endif %}
+        <div><dt class="font-semibold">Experience ({{ structured.experience|length }})</dt>
+          <dd><ul class="mt-1 list-disc pl-5">{% for e in structured.experience %}<li>{{ e.title }}{% if e.employer %} — {{ e.employer }}{% endif %} <span class="text-ink-500">{{ e.start_date }}{% if e.end_date %}–{{ e.end_date }}{% endif %}</span> <span class="text-xs text-ink-400">({{ e.bullets|length }} bullets)</span></li>{% empty %}<li class="list-none text-ink-500">None detected</li>{% endfor %}</ul></dd></div>
+        <div><dt class="font-semibold">Education ({{ structured.education|length }})</dt>
+          <dd><ul class="mt-1 list-disc pl-5">{% for e in structured.education %}<li>{{ e.qualification }} {{ e.institution }}</li>{% empty %}<li class="list-none text-ink-500">None detected</li>{% endfor %}</ul></dd></div>
+        <div><dt class="font-semibold">Skills ({{ structured.skills|length }})</dt><dd>{{ structured.skills|join:", "|default:"None detected" }}</dd></div>
+      </dl>
+    </section>
+  </div>
+</div>
+{% endblock %}

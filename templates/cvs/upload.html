@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page max-w-2xl py-8">
+  <h1 class="page-title">Add your master CV</h1>
+  <p class="muted mt-1">PDF or DOCX up to 5 MB, or paste the text. Scanned image-only PDFs can't be read.</p>
+  {% if at_limit %}
+  <div class="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Your {{ plan.name }} plan stores {{ plan.max_master_cvs }} master CV{{ plan.max_master_cvs|pluralize }}. Delete one in the <a href="{% url 'cvs:workspace' %}">workspace</a> or <a href="{% url 'billing:pricing' %}">upgrade</a>.</div>
+  {% else %}
+  <form method="post" enctype="multipart/form-data" class="card card-body mt-6 space-y-5">{% csrf_token %}
+    {% if form.non_field_errors %}<div class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+    <div><label class="label" for="id_title">Name this CV</label>{{ form.title }}</div>
+    <div><label class="label" for="id_file">Upload file</label>{{ form.file }}{% for e in form.file.errors %}<p class="error">{{ e }}</p>{% endfor %}</div>
+    <div class="relative text-center text-xs uppercase tracking-wide text-ink-400"><span class="bg-white px-2">or</span></div>
+    <div><label class="label" for="id_text">Paste CV text</label>{{ form.text }}{% for e in form.text.errors %}<p class="error">{{ e }}</p>{% endfor %}</div>
+    <label class="flex items-center gap-2 text-sm">{{ form.make_primary }} Use as my primary CV</label>
+    <p class="text-xs text-ink-500">Your CV is stored privately. It is only sent to our AI provider when you request tailoring. <a href="{% url 'core:privacy' %}">Privacy policy</a></p>
+    <button class="btn-primary" type="submit">Save CV</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

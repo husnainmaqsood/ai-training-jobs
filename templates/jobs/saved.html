@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block content %}
+<div class="container-page py-8">
+  <h1 class="page-title">Saved jobs</h1>
+  <p class="muted mt-1">{{ saved|length }} of {{ plan.max_saved_jobs }} on your {{ plan.name }} plan.</p>
+  {% if saved %}
+  <div class="mt-6 grid gap-4 md:grid-cols-2">
+    {% for s in saved %}{% with job=s.job %}
+      <div>{% include "jobs/_job_card.html" %}{% if not job.is_public %}<p class="mt-1 text-xs text-amber-700">This listing is no longer open.</p>{% endif %}</div>
+    {% endwith %}{% endfor %}
+  </div>
+  {% else %}
+  <div class="card card-body mt-6 text-center"><p class="text-ink-600">You haven't saved any jobs yet.</p><a href="{% url 'jobs:list' %}" class="btn-primary mx-auto mt-4">Browse jobs</a></div>
+  {% endif %}
+</div>
+{% endblock %}

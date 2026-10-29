@@ -1,0 +1,39 @@
+{% load static %}<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% if meta_title %}{{ meta_title }} · {% endif %}{{ SITE_NAME }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ meta_description|default:'Find remote AI training jobs that match your skills, tailor your CV, and apply faster — all in one place.'|truncatechars:160 }}{% endblock %}">
+  <link rel="canonical" href="{% block canonical %}{{ SITE_URL }}{{ request.path }}{% endblock %}">
+  {% if noindex %}<meta name="robots" content="noindex, follow">{% endif %}
+  {% block robots %}{% endblock %}
+  <meta property="og:site_name" content="{{ SITE_NAME }}">
+  <meta property="og:title" content="{% if meta_title %}{{ meta_title }}{% else %}{{ SITE_NAME }}{% endif %}">
+  <meta property="og:description" content="{{ meta_description|default:'Find remote AI training jobs, tailor your CV honestly, and track applications.'|truncatechars:200 }}">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:url" content="{{ SITE_URL }}{{ request.path }}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <meta name="htmx-config" content='{"includeIndicatorStyles": false}'>
+  <link rel="icon" href="{% static 'img/favicon-64.png' %}" type="image/png">
+  <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+  <meta property="og:image" content="{{ SITE_URL }}{% static 'img/og-image.png' %}">
+  <link rel="preload" href="{% static 'fonts/geist-latin-wght-normal.woff2' %}" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}{{ ASSET_VERSION }}">
+  <meta name="theme-color" content="#fbfcfd">
+  {% block head %}{% endblock %}
+  <script src="{% static 'js/htmx.min.js' %}" defer></script>
+  <script src="{% static 'js/app.js' %}{{ ASSET_VERSION }}" defer></script>
+</head>
+<body class="flex min-h-screen flex-col">
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:shadow">Skip to content</a>
+  {% if AI_IS_MOCK %}
+  <div class="border-b border-amber-200/70 bg-amber-50 px-4 py-1.5 text-center text-xs font-medium text-amber-800">Development mode: CV generation uses a built-in mock (keyword heuristics), not OpenAI.</div>
+  {% endif %}
+  {% include "partials/nav.html" %}
+  {% include "partials/messages.html" %}
+  <main id="main" class="flex-1">{% block content %}{% endblock %}</main>
+  {% include "partials/footer.html" %}
+</body>
+</html>

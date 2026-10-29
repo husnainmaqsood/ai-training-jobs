@@ -1,0 +1,25 @@
+[project]
+name = "aitrainjobs"
+version = "1.0.0"
+requires-python = ">=3.12"
+
+[tool.ruff]
+line-length = 150
+target-version = "py312"
+extend-exclude = ["*/migrations/*", "node_modules", ".venv", "staticfiles"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ", "S"]
+ignore = [
+  "S101",  # assert in tests
+  "S105", "S106",  # test passwords
+  "B904",
+  "DJ001",  # nullable CharField not used, but allow
+  "S311",
+  "E501",   # long strings/HTML attrs are clearer unwrapped
+  "DJ012",  # member ordering is a style preference
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S", "B"]
+"*/management/commands/*" = ["S"]

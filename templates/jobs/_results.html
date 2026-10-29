@@ -1,0 +1,20 @@
+{% load ui %}
+<p class="mb-3 text-[13px] text-ink-500"><span class="font-medium text-ink-800">{{ total }}</span> open listing{{ total|pluralize }}{% if form.q.value %} for “{{ form.q.value }}”{% endif %}</p>
+{% if jobs %}
+<div class="card stagger overflow-hidden">
+  {% for job in jobs %}{% include "jobs/_job_row.html" %}{% endfor %}
+</div>
+{% if page.has_other_pages %}
+<nav class="mt-6 flex items-center justify-between" aria-label="Pagination">
+  {% if page.has_previous %}<a class="btn-secondary btn-sm" href="{% page_url page.previous_page_number %}" rel="prev" hx-get="{% page_url page.previous_page_number %}" hx-target="#results" hx-push-url="true">← Previous</a>{% else %}<span></span>{% endif %}
+  <span class="text-[13px] text-ink-500">Page {{ page.number }} of {{ page.paginator.num_pages }}</span>
+  {% if page.has_next %}<a class="btn-secondary btn-sm" href="{% page_url page.next_page_number %}" rel="next" hx-get="{% page_url page.next_page_number %}" hx-target="#results" hx-push-url="true">Next →</a>{% else %}<span></span>{% endif %}
+</nav>
+{% endif %}
+{% else %}
+<div class="card card-body py-12 text-center">
+  <p class="font-medium text-ink-900">No listings match</p>
+  <p class="mt-1 text-sm text-ink-500">Try a broader search term or a different company.</p>
+  <a href="{% url 'jobs:list' %}" class="btn-secondary btn-sm mx-auto mt-4">Clear filters</a>
+</div>
+{% endif %}

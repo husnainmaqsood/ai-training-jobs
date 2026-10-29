@@ -1,0 +1,40 @@
+{% load static %}<footer class="mt-24 border-t border-ink-950/[.06] bg-white">
+  <div class="container-page grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-[1.6fr_1fr_1fr_1fr]">
+    <div class="max-w-xs">
+      <a href="{% url 'core:home' %}" class="inline-block no-underline"><img src="{% static 'img/orexia-logo.png' %}" alt="{{ SITE_NAME }}" width="140" height="28" class="h-7 w-auto"></a>
+      <p class="mt-3 text-sm leading-relaxed text-ink-500">Remote AI-training and LLM roles from the companies hiring, each with a direct link to apply.</p>
+    </div>
+    <nav aria-label="Jobs">
+      <p class="text-xs font-semibold uppercase tracking-[.12em] text-ink-400">Jobs</p>
+      <ul class="mt-4 space-y-2.5 text-sm">
+        <li><a class="text-ink-600 no-underline transition-colors hover:text-brand-700" href="{% url 'jobs:list' %}">Explore jobs</a></li>
+        <li><a class="text-ink-600 no-underline transition-colors hover:text-brand-700" href="{% url 'jobs:platform_list' %}">Companies</a></li>
+        <li><a class="text-ink-600 no-underline transition-colors hover:text-brand-700" href="{% url 'jobs:list' %}?worldwide_only=on">Open worldwide</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="{% if USER_ACCOUNTS_ENABLED %}CV{% else %}Help{% endif %}">
+      <p class="text-xs font-semibold uppercase tracking-[.12em] text-ink-400">{% if USER_ACCOUNTS_ENABLED %}CV{% else %}Help{% endif %}</p>
+      <ul class="mt-4 space-y-2.5 text-sm">
+        {% if USER_ACCOUNTS_ENABLED %}
+        <li><a class="text-ink-600 no-underline transition-colors hover:text-brand-700" href="{% url 'cvs:builder' %}">CV Builder</a></li>
+        <li><a class="text-ink-600 no-underline transition-colors hover:text-brand-700" href="{% url 'cvs:builder' %}#credits">Credits &amp; pricing</a></li>
+        {% else %}
+        <li><a class="text-ink-600 no-underline transition-colors hover:text-brand-700" href="{% url 'jobs:platform_list' %}">Platforms</a></li>
+        {% endif %}
+        <li><a class="text-ink-600 no-underline transition-colors hover:text-brand-700" href="{% url 'core:faq' %}">FAQ</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Company">
+      <p class="text-xs font-semibold uppercase tracking-[.12em] text-ink-400">About</p>
+      <ul class="mt-4 space-y-2.5 text-sm">
+        <li><a class="text-ink-600 no-underline transition-colors hover:text-brand-700" href="{% url 'core:contact' %}">Contact</a></li>
+        <li><a class="text-ink-600 no-underline transition-colors hover:text-brand-700" href="{% url 'core:referral_disclosure' %}">Referral disclosure</a></li>
+        <li><a class="text-ink-600 no-underline transition-colors hover:text-brand-700" href="{% url 'core:privacy' %}">Privacy</a></li>
+        <li><a class="text-ink-600 no-underline transition-colors hover:text-brand-700" href="{% url 'core:terms' %}">Terms</a></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="border-t border-line">
+    <p class="container-page py-6 text-xs leading-relaxed text-ink-400">© {% now "Y" %} {{ SITE_NAME }}. An independent directory, not affiliated with the companies listed. Some “Apply” links are referral links: if you join through one we may earn a reward, at no cost to you. <a class="text-ink-500 decoration-ink-300 hover:text-ink-950" href="{% url 'core:referral_disclosure' %}">How referrals work</a>.</p>
+  </div>
+</footer>

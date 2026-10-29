@@ -1,0 +1,5 @@
+<form method="post" action="{% url 'jobs:toggle_save' job.pk %}" hx-post="{% url 'jobs:toggle_save' job.pk %}" hx-swap="outerHTML" id="save-{{ job.pk }}">
+  {% csrf_token %}
+  <button type="submit" class="btn-secondary w-full" aria-pressed="{% if saved %}true{% else %}false{% endif %}">{% if saved %}★ Saved{% else %}☆ Save job{% endif %}</button>
+  {% if error %}<p class="error">{{ error }} <a href="{% url 'billing:pricing' %}">See plans</a></p>{% endif %}
+</form>

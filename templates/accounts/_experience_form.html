@@ -1,0 +1,19 @@
+<div class="space-y-3 border-t border-line px-5 py-5 first:border-t-0 sm:px-6" data-formset-item>
+  {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+  {% if f.non_field_errors %}<div class="alert-error">{{ f.non_field_errors }}</div>{% endif %}
+  <div class="grid gap-3 sm:grid-cols-2">
+    <div><label class="label" for="{{ f.company.id_for_label }}">Company</label>{{ f.company }}{% for e in f.company.errors %}<p class="error">{{ e }}</p>{% endfor %}</div>
+    <div><label class="label" for="{{ f.title.id_for_label }}">Job title</label>{{ f.title }}{% for e in f.title.errors %}<p class="error">{{ e }}</p>{% endfor %}</div>
+  </div>
+  <div class="grid gap-3 sm:grid-cols-3">
+    <div><label class="label" for="{{ f.start_date.id_for_label }}">Start</label>{{ f.start_date }}{% for e in f.start_date.errors %}<p class="error">{{ e }}</p>{% endfor %}</div>
+    <div><label class="label" for="{{ f.end_date.id_for_label }}">End <span class="font-normal text-ink-400">(empty = present)</span></label>{{ f.end_date }}</div>
+    <div><label class="label" for="{{ f.location.id_for_label }}">Location <span class="font-normal text-ink-400">(optional)</span></label>{{ f.location }}</div>
+  </div>
+  <div><label class="label" for="{{ f.description.id_for_label }}">What you did <span class="font-normal text-ink-400">(one point per line)</span></label>{{ f.description }}</div>
+  <div class="flex justify-end">
+    <label class="sr-only" for="{{ f.DELETE.id_for_label }}">Remove this role</label>
+    <span class="hidden">{{ f.DELETE }}</span>
+    <button type="button" class="btn-danger-ghost btn-sm" data-formset-remove>Remove role</button>
+  </div>
+</div>

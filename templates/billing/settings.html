@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block content %}
+<div class="container-page max-w-3xl py-8">
+  <h1 class="page-title">Billing & subscription</h1>
+  <section class="card card-body mt-6">
+    {% if subscription %}
+      <div class="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p class="stat-label">Current plan</p>
+          <p class="text-xl font-bold">{{ subscription.plan.name }}</p>
+          <p class="mt-1 text-sm">
+            {% if subscription.status == "past_due" %}<span class="badge-red">Payment failed</span> Please update your payment method. Premium stays active for a grace period of {{ grace_days }} day{{ grace_days|pluralize }}.
+            {% elif subscription.cancel_at_period_end %}<span class="badge-amber">Cancels {{ subscription.current_period_end|date:"d M Y" }}</span> You keep Premium until then.
+            {% else %}<span class="badge-green">{{ subscription.get_status_display }}</span> Renews {{ subscription.current_period_end|date:"d M Y" }}.{% endif %}
+          </p>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <form method="post" action="{% url 'billing:portal' %}">{% csrf_token %}<button class="btn-primary" type="submit">Manage billing</button></form>
+          {% if subscription.cancel_at_period_end %}
+          <form method="post" action="{% url 'billing:resume' %}">{% csrf_token %}<button class="btn-secondary" type="submit">Resume renewal</button></form>
+          {% else %}
+          <form method="post" action="{% url 'billing:cancel' %}" data-confirm="Cancel at the end of the current period? You'll keep Premium until {{ subscription.current_period_end|date:'d M Y' }}.">{% csrf_token %}<button class="btn-ghost text-red-600" type="submit">Cancel at period end</button></form>
+          {% endif %}
+        </div>
+      </div>
+      <p class="mt-4 text-xs text-ink-500">Use "Manage billing" to change plan (monthly ↔ annual), update your card, or download invoices. Changes take effect once our payment provider confirms them.</p>
+    {% else %}
+      <p class="stat-label">Current plan</p>
+      <p class="text-xl font-bold">{{ quota.plan.name }}</p>
+      <a href="{% url 'billing:pricing' %}" class="btn-primary mt-4">See Premium plans</a>
+    {% endif %}
+  </section>
+  <div class="mt-6">{% include "accounts/_quota.html" %}</div>
+  <section class="card card-body mt-6">
+    <h2 class="section-title">Invoices & payments</h2>
+    <div class="mt-4 overflow-x-auto">
+      <table class="table">
+        <thead><tr><th>Date</th><th>Invoice</th><th>Status</th><th class="text-right">Paid</th><th class="text-right">Refunded</th><th></th></tr></thead>
+        <tbody class="divide-y divide-line">
+        {% for inv in invoices %}
+        <tr><td>{{ inv.provider_created_at|date:"d M Y" }}</td><td>{{ inv.number|default:"—" }}</td><td>{{ inv.status }}</td>
+          <td class="text-right">{{ inv.amount_paid|cents }} {{ inv.currency|upper }}</td><td class="text-right">{% if inv.amount_refunded %}{{ inv.amount_refunded|cents }}{% else %}—{% endif %}</td>
+          <td class="text-right">{% if inv.hosted_invoice_url %}<a href="{{ inv.hosted_invoice_url }}" target="_blank" rel="noopener">View ↗</a>{% endif %}</td></tr>
+        {% empty %}<tr><td colspan="6" class="text-ink-500">No invoices yet.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+  {% if all_subscriptions|length > 1 %}
+  <section class="card card-body mt-6"><h2 class="section-title">Subscription history</h2>
+    <ul class="mt-3 text-sm">{% for s in all_subscriptions %}<li>{{ s.plan.name }} — {{ s.get_status_display }} ({{ s.created_at|date:"d M Y" }})</li>{% endfor %}</ul></section>
+  {% endif %}
+</div>
+{% endblock %}

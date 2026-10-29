@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block content %}
+<div class="container-page py-8">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="page-title">Welcome{% if profile.full_name %}, {{ profile.full_name }}{% endif %}</h1>
+      <p class="muted">Your plan: <strong>{{ quota.plan.name }}</strong>{% if subscription and subscription.cancel_at_period_end %} · cancels {{ subscription.current_period_end|date:"d M Y" }}{% endif %}</p>
+    </div>
+    <div class="flex gap-2"><a href="{% url 'cvs:tailor' %}" class="btn-primary">✨ Tailor a CV</a><a href="{% url 'jobs:list' %}{% if profile.country %}?country={{ profile.country }}{% endif %}" class="btn-secondary">Find jobs</a></div>
+  </div>
+
+  <div class="mt-6 grid gap-4 md:grid-cols-3">
+    {% include "accounts/_quota.html" %}
+    <div class="card card-body">
+      <p class="stat-label">Master CVs</p>
+      <p class="stat-value">{{ master_cvs|length }}</p>
+      {% if master_cvs %}<a href="{% url 'cvs:workspace' %}" class="mt-2 inline-block text-sm font-semibold">Manage CVs →</a>{% else %}<a href="{% url 'cvs:upload' %}" class="btn-secondary btn-sm mt-3">Upload your CV</a>{% endif %}
+    </div>
+    <div class="card card-body">
+      <p class="stat-label">Applications tracked</p>
+      <p class="stat-value">{{ applications|length }}</p>
+      <a href="{% url 'tracker:board' %}" class="mt-2 inline-block text-sm font-semibold">Open tracker →</a>
+    </div>
+  </div>
+
+  {% if not profile.country %}
+  <div class="mt-6 rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">Add your country to your <a href="{% url 'accounts:profile' %}">profile</a> to see jobs you're actually eligible for.</div>
+  {% endif %}
+
+  <div class="mt-8 grid gap-6 lg:grid-cols-2">
+    <section class="card card-body">
+      <div class="flex items-center justify-between"><h2 class="section-title">Recent tailored CVs</h2><a href="{% url 'cvs:history' %}" class="text-sm">All →</a></div>
+      <ul class="mt-4 divide-y divide-line">
+        {% for g in recent_generations %}
+        <li class="flex items-center justify-between py-2 text-sm">
+          <a href="{{ g.get_absolute_url }}">{{ g.target_title }}{% if g.target_company %} — {{ g.target_company }}{% endif %}</a>
+          <span class="{% if g.status == 'succeeded' %}badge-green{% elif g.status == 'failed' %}badge-red{% else %}badge-amber{% endif %}">{{ g.get_status_display }}</span>
+        </li>
+        {% empty %}<li class="py-2 text-sm text-ink-500">No tailored CVs yet.</li>{% endfor %}
+      </ul>
+    </section>
+    <section class="card card-body">
+      <div class="flex items-center justify-between"><h2 class="section-title">Saved jobs</h2><a href="{% url 'jobs:saved' %}" class="text-sm">All →</a></div>
+      <ul class="mt-4 divide-y divide-line">
+        {% for s in saved_jobs %}
+        <li class="flex items-center justify-between py-2 text-sm"><a href="{{ s.job.get_absolute_url }}">{{ s.job.title }}</a><span class="text-xs text-ink-500">{{ s.job.display_company }}</span></li>
+        {% empty %}<li class="py-2 text-sm text-ink-500">No saved jobs yet.</li>{% endfor %}
+      </ul>
+    </section>
+    <section class="card card-body lg:col-span-2">
+      <div class="flex items-center justify-between"><h2 class="section-title">Applications</h2><a href="{% url 'tracker:board' %}" class="text-sm">Tracker →</a></div>
+      <ul class="mt-4 divide-y divide-line">
+        {% for a in applications %}
+        <li class="flex items-center justify-between py-2 text-sm"><a href="{% url 'tracker:detail' a.pk %}">{{ a.title }} <span class="text-ink-500">· {{ a.company }}</span></a><span class="{{ a.status|status_badge }}">{{ a.get_status_display }}</span></li>
+        {% empty %}<li class="py-2 text-sm text-ink-500">Track an application from any job page.</li>{% endfor %}
+      </ul>
+    </section>
+  </div>
+  <div class="mt-8 flex flex-wrap gap-3 text-sm"><a href="{% url 'accounts:profile' %}">Profile</a> · <a href="{% url 'billing:settings' %}">Billing</a> · <a href="{% url 'accounts:usage' %}">Usage</a></div>
+</div>
+{% endblock %}

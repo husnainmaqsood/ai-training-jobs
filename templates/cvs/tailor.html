@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page py-8">
+  <h1 class="page-title">Tailor your CV to a job</h1>
+  <p class="muted mt-1">The AI only rewrites and reorders facts already in your CV. Anything it can't support is reported as a gap, not added.</p>
+  <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_20rem]">
+    <div>
+    {% if not ai_configured %}
+      <div class="card card-body text-sm text-amber-900">AI tailoring isn't configured on this server yet (missing AI provider credentials).</div>
+    {% elif not has_cv %}
+      <div class="card card-body text-center"><p class="text-ink-600">First, add your master CV.</p><a href="{% url 'cvs:upload' %}" class="btn-primary mx-auto mt-4">Upload CV</a></div>
+    {% else %}
+      <form method="post" class="card card-body space-y-4">{% csrf_token %}
+        {% if job %}<div class="rounded-xl bg-brand-50 p-3 text-sm text-brand-900">Tailoring for <a href="{{ job.get_absolute_url }}">{{ job.title }}</a> at {{ job.display_company }}. The listing text is pre-filled below — you can edit it.</div>{% endif %}
+        {% if form.non_field_errors %}<div class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+        {{ form.job_id }}
+        <div><label class="label" for="id_master_cv">{{ form.master_cv.label }}</label>{{ form.master_cv }}</div>
+        <div class="grid gap-4 sm:grid-cols-2">
+          <div><label class="label" for="id_target_title">{{ form.target_title.label }}</label>{{ form.target_title }}{% for e in form.target_title.errors %}<p class="error">{{ e }}</p>{% endfor %}</div>
+          <div><label class="label" for="id_target_company">{{ form.target_company.label }} <span class="font-normal text-ink-400">(optional)</span></label>{{ form.target_company }}</div>
+        </div>
+        <div><label class="label" for="id_job_description">{{ form.job_description.label }}</label>{{ form.job_description }}{% for e in form.job_description.errors %}<p class="error">{{ e }}</p>{% endfor %}</div>
+        {% if needs_consent %}
+        <div class="rounded-xl border border-line bg-ink-50 p-3">
+          <label class="flex items-start gap-2 text-sm text-ink-700">{{ form.ai_consent }} <span>{{ form.ai_consent.label }} Your email and phone number are removed first. We don't use your CV to train AI models. <a href="{% url 'core:privacy' %}">Details</a></span></label>
+          {% for e in form.ai_consent.errors %}<p class="error">{{ e }}</p>{% endfor %}
+        </div>
+        {% endif %}
+        <div class="flex flex-wrap items-center gap-3">
+          <button class="btn-primary" type="submit" {% if quota.remaining == 0 %}disabled{% endif %}>Generate tailored CV (uses 1 of {{ quota.remaining }} left)</button>
+          {% if quota.remaining == 0 %}<a href="{% url 'billing:pricing' %}" class="text-sm font-semibold">Upgrade for more generations</a>{% endif %}
+        </div>
+      </form>
+    {% endif %}
+    </div>
+    <aside class="space-y-4">
+      {% include "accounts/_quota.html" %}
+      <div class="card card-body text-sm text-ink-600">
+        <h2 class="font-semibold text-ink-900">What the fact check does</h2>
+        <ul class="mt-2 list-disc space-y-1 pl-5">
+          <li>Employers, titles, dates and degrees are copied from your CV — the AI can't change them.</li>
+          <li>Bullets with numbers or technologies that aren't in that role's original text are rejected.</li>
+          <li>Skills not evidenced anywhere in your CV are removed.</li>
+          <li>You see everything that was rejected.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+# Secrets & local config
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Django
+staticfiles/
+private_media/
+media/
+*.sqlite3
+
+# Node
+node_modules/
+
+# OS / editors
+.DS_Store
+.idea/
+.vscode/
+
+# Never commit personal CVs (test fixtures are fictional and allowed)
+*.pdf
+*.docx
+!tests/fixtures/*.pdf
+!tests/fixtures/*.docx

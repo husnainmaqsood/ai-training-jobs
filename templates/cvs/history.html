@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page py-8">
+  <h1 class="page-title">Tailored CV history</h1>
+  {% if hidden > 0 %}<p class="mt-2 rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">{{ hidden }} older version{{ hidden|pluralize }} are hidden on the {{ plan.name }} plan (shows the latest {{ plan.max_generated_cvs_visible }}). <a href="{% url 'billing:pricing' %}">Upgrade</a> to see your full history.</p>{% endif %}
+  <div class="card mt-6 overflow-x-auto">
+    <table class="table">
+      <thead><tr><th>Job</th><th>Created</th><th>Coverage est.</th><th>Fact check</th><th></th></tr></thead>
+      <tbody class="divide-y divide-line">
+      {% for g in generated %}
+        <tr>
+          <td><a href="{{ g.get_absolute_url }}" class="font-medium">{{ g.title }}</a>{% if g.is_user_edited %} <span class="badge-slate">edited</span>{% endif %}</td>
+          <td class="whitespace-nowrap">{{ g.created_at|date:"d M Y" }}</td>
+          <td>{% if g.match_score is not None %}{{ g.match_score }}%{% else %}—{% endif %}</td>
+          <td>{% if g.validation_report.passed_without_changes %}<span class="badge-green">clean</span>{% else %}<span class="badge-amber">adjusted</span>{% endif %}</td>
+          <td class="text-right"><form method="post" action="{% url 'cvs:generated_delete' g.public_id %}" data-confirm="Delete this tailored CV?">{% csrf_token %}<button class="text-xs text-red-600 hover:underline">Delete</button></form></td>
+        </tr>
+      {% empty %}<tr><td colspan="5" class="py-6 text-center text-ink-500">No tailored CVs yet. <a href="{% url 'cvs:tailor' %}">Create one</a>.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if pending_or_failed %}
+  <h2 class="section-title mt-8">In progress / failed</h2>
+  <ul class="mt-3 space-y-1 text-sm">{% for g in pending_or_failed %}<li><a href="{{ g.get_absolute_url }}">{{ g.target_title }}</a> — {{ g.get_status_display }}{% if g.quota_refunded %} (refunded){% endif %}</li>{% endfor %}</ul>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="container-page prose prose-stone max-w-3xl py-12">
+  <h1>Privacy policy</h1>
+  {% include "core/_legal_note.html" %}
+  <p><strong>Controller:</strong> [Legal entity name, address]. Contact: <a href="mailto:{{ CONTACT_EMAIL }}">{{ CONTACT_EMAIL }}</a>.</p>
+  <h2>What we collect</h2>
+  <ul>
+    <li><strong>Account data:</strong> email, hashed password, optional name, country, preferred regions, skills and experience level.</li>
+    <li><strong>CV data:</strong> files you upload and their extracted text, tailored versions you generate, and job descriptions you paste.</li>
+    <li><strong>Application tracker data:</strong> statuses, dates and notes you enter.</li>
+    <li><strong>Billing data:</strong> handled by our payment provider (Stripe). We store only provider identifiers, subscription status and invoice summaries — never card numbers or security codes.</li>
+    <li><strong>Outbound click data:</strong> when you click an application link we record the listing, link type and a salted hash that rotates daily. We do not store your IP address or browser fingerprint with clicks.</li>
+    <li><strong>Technical logs:</strong> error reports (without request bodies or CV content) and AI usage metrics (token counts, cost, status — not content).</li>
+  </ul>
+  <h2>AI processing of your CV</h2>
+  <p>When you ask us to tailor a CV, we send the CV text and the job description to our AI provider ([OpenAI, L.L.C.], or as configured) to generate the result. Before sending, we remove your email address and phone number, and your name and contact details are not included in tailoring requests. We request that the provider not store the request for its own purposes where the provider supports that option. We do <strong>not</strong> use your CVs to train AI models. You must give consent before the first tailoring request; you can withdraw it by deleting your CVs or account.</p>
+  <h2>Why we process data (legal bases)</h2>
+  <p>To provide the service you requested (contract), to process payments and keep records (legal obligation), to prevent abuse and secure the service (legitimate interests), and for the newsletter and job alerts (consent, double opt-in).</p>
+  <h2>Retention</h2>
+  <p>Account, CV and tracker data are kept until you delete them or your account. Deleting your account permanently removes your CVs (including uploaded files), generated versions, saved jobs and tracker entries. Billing records are retained for the period required by tax law. Aggregated, non-identifying statistics may be retained.</p>
+  <h2>Your rights</h2>
+  <p>You can access, correct, export (CVs and tailored versions download as files) and delete your data from your dashboard, or contact us. You may also complain to your local data-protection authority.</p>
+  <h2>Processors</h2>
+  <p>[Hosting provider], [email provider], Stripe (payments), [AI provider]. International transfers rely on [standard contractual clauses / adequacy decisions].</p>
+  <h2>Cookies</h2>
+  <p>We use strictly necessary cookies for sign-in sessions and CSRF protection. We do not use advertising cookies.</p>
+</article>
+{% endblock %}

@@ -1,0 +1,58 @@
+{% load static %}{% with p=request.path %}
+<header class="sticky top-0 z-40 border-b border-ink-950/[.06] bg-canvas/75 backdrop-blur-xl backdrop-saturate-150">
+  <nav class="container-page relative flex h-[68px] items-center justify-between gap-4" aria-label="Main">
+    <a href="{% url 'core:home' %}" class="flex shrink-0 items-center no-underline" aria-label="{{ SITE_NAME }} — home">
+      <img src="{% static 'img/orexia-logo.png' %}" alt="{{ SITE_NAME }}" width="150" height="30" class="h-[30px] w-auto">
+    </a>
+    <div class="absolute left-1/2 hidden -translate-x-1/2 items-center gap-1 md:flex">
+      <a href="{% url 'core:home' %}" class="{% if p == '/' %}nav-link-active{% else %}nav-link{% endif %}">Home</a>
+      <a href="{% url 'jobs:list' %}" class="{% if p|slice:':6' == '/jobs/' %}nav-link-active{% else %}nav-link{% endif %}">Explore Jobs</a>
+      <a href="{% url 'jobs:platform_list' %}" class="{% if p|slice:':11' == '/platforms/' %}nav-link-active{% else %}nav-link{% endif %}">Platforms</a>
+      {% if USER_ACCOUNTS_ENABLED %}<a href="{% url 'cvs:builder' %}" class="{% if p|slice:':4' == '/cv/' %}nav-link-active{% else %}nav-link{% endif %}">CV Builder</a>{% endif %}
+    </div>
+    <div class="hidden items-center gap-1.5 md:flex">
+      {% if not USER_ACCOUNTS_ENABLED %}
+        <a href="{% url 'jobs:list' %}" class="btn-primary btn-sm">Find jobs <span aria-hidden="true">→</span></a>
+      {% elif user.is_authenticated %}
+        <a href="{% url 'accounts:profile' %}" class="{% if p|slice:':10' == '/accounts/' %}nav-link-active{% else %}nav-link{% endif %} inline-flex items-center gap-2 !pl-1.5">
+          <span class="grid h-6 w-6 place-items-center rounded-full bg-ink-950 text-[11px] font-semibold text-white" aria-hidden="true">{{ user.email|first|upper }}</span>Profile
+        </a>
+        <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="btn-ghost btn-sm" type="submit">Log out</button></form>
+      {% else %}
+        <a href="{% url 'accounts:login' %}" class="nav-link">Log in</a>
+        <a href="{% url 'accounts:register' %}" class="btn-primary btn-sm">Sign up</a>
+      {% endif %}
+    </div>
+    <button type="button" class="btn-ghost btn-sm -mr-2 md:hidden" data-toggle="mobile-menu" aria-controls="mobile-menu" aria-expanded="false">
+      <span class="sr-only">Open menu</span>
+      <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-width="1.75" d="M4 8h16M4 16h16"/></svg>
+    </button>
+    <div id="mobile-menu" data-popup class="popover absolute inset-x-4 top-full mt-2 hidden p-2 md:hidden">
+      <a href="{% url 'core:home' %}" class="nav-link block">Home</a>
+      <a href="{% url 'jobs:list' %}" class="nav-link block">Explore Jobs</a>
+      <a href="{% url 'jobs:platform_list' %}" class="nav-link block">Platforms</a>
+      {% if USER_ACCOUNTS_ENABLED %}
+        <a href="{% url 'cvs:builder' %}" class="nav-link block">CV Builder</a>
+        <div class="my-2 divider"></div>
+        {% if user.is_authenticated %}
+          <a href="{% url 'accounts:profile' %}" class="nav-link block">Profile</a>
+          <form method="post" action="{% url 'accounts:logout' %}">{% csrf_token %}<button class="nav-link w-full text-left" type="submit">Log out</button></form>
+        {% else %}
+          <a href="{% url 'accounts:login' %}" class="nav-link block">Log in</a>
+          <a href="{% url 'accounts:register' %}" class="btn-primary mt-2 w-full">Sign up</a>
+        {% endif %}
+      {% else %}
+        <a href="{% url 'jobs:list' %}" class="btn-primary mt-2 w-full">Find jobs <span aria-hidden="true">→</span></a>
+      {% endif %}
+    </div>
+  </nav>
+</header>
+{% if USER_ACCOUNTS_ENABLED and user.is_authenticated and not user.email_verified %}
+<div class="border-b border-amber-200/70 bg-amber-50">
+  <div class="container-page flex flex-wrap items-center justify-between gap-2 py-2 text-[13px] text-amber-900">
+    <span>Please confirm your email address — we sent you a link.</span>
+    <form method="post" action="{% url 'accounts:resend_verification' %}">{% csrf_token %}<input type="hidden" name="next" value="{{ request.path }}"><button class="font-medium underline underline-offset-2" type="submit">Resend email</button></form>
+  </div>
+</div>
+{% endif %}
+{% endwith %}

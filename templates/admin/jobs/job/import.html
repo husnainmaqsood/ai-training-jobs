@@ -1,0 +1,48 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">{% translate 'Home' %}</a> › <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a> › <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a> › Import from Excel</div>
+{% endblock %}
+{% block content %}
+<div id="content-main">
+  <p>Upload your latest job sheet. You'll see a <strong>preview</strong> of what will be added, updated, skipped and rejected before anything is saved.
+  Re-uploading the same file is safe — matching jobs are updated in place and never duplicated.</p>
+  <p><a class="button" href="{% url 'admin:jobs_job_import_template' 'xlsx' %}">Download Excel template</a> &nbsp; <a href="{% url 'admin:jobs_job_import_template' 'csv' %}">CSV template</a></p>
+
+  <form method="post" enctype="multipart/form-data">{% csrf_token %}
+    {% if form.non_field_errors %}<p class="errornote">{{ form.non_field_errors|join:" " }}</p>{% endif %}
+    <fieldset class="module aligned">
+      {% for field in form %}
+      <div class="form-row{% if field.errors %} errors{% endif %}">
+        {{ field.errors }}
+        <div><label class="required" for="{{ field.id_for_label }}">{{ field.label }}:</label> {{ field }}</div>
+        {% if field.help_text %}<div class="help">{{ field.help_text }}</div>{% endif %}
+      </div>
+      {% endfor %}
+    </fieldset>
+    <div class="submit-row"><input type="submit" class="default" value="Upload and preview"></div>
+  </form>
+
+  <h2>Columns</h2>
+  <p>Only <strong>title</strong>, <strong>platform</strong> and <strong>job_link</strong> are required. Header names are flexible
+  (e.g. “Company” for platform, “URL” for job_link, “Rate” for hourly_rate); unknown columns are ignored.
+  Empty cells never erase what's already saved for a job.</p>
+  <table>
+    <thead><tr><th>Column</th><th>Required</th><th>Format</th></tr></thead>
+    <tbody>{% for name, required, help in columns %}<tr><td><code>{{ name }}</code></td><td>{{ required }}</td><td>{{ help }}</td></tr>{% endfor %}</tbody>
+  </table>
+
+  <h2>How matching works</h2>
+  <ul>
+    <li>If a row has an <code>external_id</code>, it updates the job with that ID on the same platform.</li>
+    <li>Otherwise it updates the job on the same platform with the same link (ignoring <code>http/https</code>, <code>www.</code>, trailing slashes and tracking parameters such as <code>utm_*</code>).</li>
+    <li>A link that already belongs to a job on another platform, or matches more than one job, is rejected rather than guessed.</li>
+    <li>Jobs missing from the file are left alone, unless you choose <em>Full snapshot</em> and confirm closing them.</li>
+  </ul>
+
+  {% if recent %}
+  <h2>Recent imports</h2>
+  <ul>{% for r in recent %}<li><a href="{% url 'admin:jobs_importrun_change' r.pk %}">{{ r.started_at|date:"j M Y H:i" }} — {{ r.filename }}</a>: {{ r.get_status_display }} · {{ r.created_count }} added, {{ r.updated_count }} updated, {{ r.duplicate_count }} skipped, {{ r.failed_count }} rejected</li>{% endfor %}</ul>
+  {% endif %}
+</div>
+{% endblock %}

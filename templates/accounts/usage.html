@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page max-w-3xl py-8">
+  <h1 class="page-title">Usage</h1>
+  <div class="mt-6">{% include "accounts/_quota.html" %}</div>
+  <section class="card card-body mt-6">
+    <h2 class="section-title">Generation ledger</h2>
+    <p class="muted mt-1">Every quota reservation and refund. A unit is used when a generation starts and refunded if it fails for a technical reason.</p>
+    <div class="mt-4 overflow-x-auto">
+      <table class="table">
+        <thead><tr><th>Date</th><th>Change</th><th>Generation</th><th>Reason</th></tr></thead>
+        <tbody class="divide-y divide-line">
+        {% for e in ledger %}
+          <tr><td>{{ e.created_at|date:"d M Y H:i" }}</td><td>{% if e.amount > 0 %}−{{ e.amount }} used{% else %}+1 refunded{% endif %}</td>
+          <td>{% if e.generation %}<a href="{{ e.generation.get_absolute_url }}">{{ e.generation.target_title|truncatechars:40 }}</a>{% endif %}</td><td class="text-xs text-ink-500">{{ e.get_kind_display }}</td></tr>
+        {% empty %}<tr><td colspan="4" class="text-ink-500">No usage yet.</td></tr>{% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}

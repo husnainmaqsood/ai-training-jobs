@@ -1,0 +1,7 @@
+Hi,
+
+Please confirm your email address for {{ SITE_NAME }} by opening this link:
+
+{{ url }}
+
+If you didn't create an account, you can ignore this email.

@@ -1,0 +1,17 @@
+{% if form.non_field_errors %}<div class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">{% for e in form.non_field_errors %}<p>{{ e }}</p>{% endfor %}</div>{% endif %}
+{% for field in form %}
+  {% if field.is_hidden %}{{ field }}{% elif field.name == "website" %}<div class="hidden" aria-hidden="true">{{ field }}</div>
+  {% elif field.field.widget.input_type == "checkbox" %}
+  <div>
+    <label class="flex items-start gap-2 text-sm text-ink-700">{{ field }} <span>{{ field.label }}</span></label>
+    {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+  </div>
+  {% else %}
+  <div>
+    <label class="label" for="{{ field.id_for_label }}">{{ field.label }}{% if not field.field.required %} <span class="font-normal text-ink-400">(optional)</span>{% endif %}</label>
+    {{ field }}
+    {% if field.help_text %}<p class="help">{{ field.help_text|safe }}</p>{% endif %}
+    {% for e in field.errors %}<p class="error">{{ e }}</p>{% endfor %}
+  </div>
+  {% endif %}
+{% endfor %}

@@ -1,0 +1,10 @@
+{% extends "accounts/_auth_shell.html" %}
+{% block auth_title %}Delete your account{% endblock %}
+{% block auth_body %}
+<p class="mb-4 text-sm text-ink-700">This cannot be undone. Your uploaded CVs, tailored versions, saved jobs and application tracker will be permanently deleted, and any active subscription will be cancelled immediately.</p>
+<form method="post" class="space-y-4" data-confirm="Permanently delete your account and all data?">{% csrf_token %}
+  {% include "partials/form_fields.html" %}
+  <button class="btn-danger w-full" type="submit">Permanently delete account</button>
+</form>
+{% endblock %}
+{% block auth_footer %}<a href="{% url 'accounts:profile' %}">Cancel</a>{% endblock %}

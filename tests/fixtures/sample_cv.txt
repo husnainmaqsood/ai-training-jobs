@@ -1,0 +1,25 @@
+Ayesha Khan
+Python Developer and AI Data Specialist
+ayesha.khan@example.com | +92 300 1234567 | Lahore, Pakistan | github.com/ayesha-example
+
+Summary
+Python developer with 4 years of experience building data pipelines and evaluating machine learning outputs. Comfortable writing clear technical feedback.
+
+Experience
+Software Engineer — Example Analytics Ltd, Jan 2022 – Present
+• Built Python ETL pipelines processing 2 million records per day using pandas and PostgreSQL
+• Reviewed pull requests for a team of 6 engineers and wrote unit tests with pytest
+• Reduced report generation time by 40% by optimising SQL queries
+
+Data Annotator — Freelance, Jun 2020 – Dec 2021
+• Labelled 15,000 text samples for sentiment classification following detailed guidelines
+• Maintained 98% accuracy on quality-control audits
+
+Education
+BSc Computer Science — University of the Punjab, 2016 – 2020
+
+Skills
+Python, SQL, pandas, PostgreSQL, pytest, Git, Data annotation, English, Urdu
+
+Certifications
+Google Data Analytics Certificate

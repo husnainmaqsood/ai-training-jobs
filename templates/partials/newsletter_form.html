@@ -1,0 +1,10 @@
+<form method="post" action="{% url 'core:newsletter_subscribe' %}" class="space-y-2.5">
+  {% csrf_token %}
+  <input type="hidden" name="job_alerts" value="on">
+  <div class="flex flex-col gap-2 sm:flex-row">
+    <label for="nl-email" class="sr-only">Email</label>
+    <input id="nl-email" type="email" name="email" required class="input" placeholder="you@example.com" autocomplete="email">
+    <button class="btn-dark shrink-0" type="submit">Subscribe</button>
+  </div>
+  <label class="flex items-start gap-2 text-xs leading-relaxed text-ink-500"><input type="checkbox" name="consent" required class="checkbox mt-0.5"> {{ form.fields.consent.label }}</label>
+</form>

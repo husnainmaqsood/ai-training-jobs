@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page py-8 sm:py-10">
+  <div class="mb-8 max-w-2xl">
+    <p class="eyebrow">CV Builder</p>
+    <h1 class="mt-4 page-title">Professional CVs from your real experience</h1>
+    <p class="mt-2 text-[15px] leading-relaxed text-ink-500">Generate a clean, ATS-friendly CV from your saved profile, or paste a job description to tailor it. It rewrites your own descriptions — it never adds experience, skills, dates or achievements you didn't give it.</p>
+  </div>
+
+  {% if not ai_configured %}<div class="alert-warn mb-6">CV generation is temporarily unavailable: the AI provider isn't configured on this server.</div>{% endif %}
+
+  <div class="grid gap-8 lg:grid-cols-[1fr_20rem]">
+    <div class="min-w-0 space-y-6">
+    {% if user.is_authenticated %}
+      {% if has_result %}
+      <div class="alert-info flex flex-wrap items-center justify-between gap-3"><span>Your last generated CV is still open in this session.</span><a href="{% url 'cvs:builder_result' %}" class="btn-secondary btn-sm">View CV</a></div>
+      {% endif %}
+
+      <section class="card" aria-labelledby="h-profile">
+        <div class="card-header">
+          <h2 id="h-profile" class="section-title">1. Your saved details</h2>
+          <a href="{% url 'accounts:profile' %}?next={% url 'cvs:builder' %}" class="btn-secondary btn-sm">Edit profile</a>
+        </div>
+        <div class="card-body">
+          {% if problems %}
+          <div class="alert-warn"><div><p class="font-medium">Finish your profile to generate a CV</p><ul class="mt-1 list-disc pl-5">{% for p in problems %}<li>{{ p }}</li>{% endfor %}</ul></div></div>
+          {% endif %}
+          <dl class="grid gap-4 text-sm sm:grid-cols-3 {% if problems %}mt-4{% endif %}">
+            <div><dt class="text-xs text-ink-500">Name</dt><dd class="mt-0.5 font-medium text-ink-900">{{ profile.full_name|default:"—" }}</dd></div>
+            <div><dt class="text-xs text-ink-500">Contact</dt><dd class="mt-0.5 truncate text-ink-800">{{ user.email }}{% if profile.phone %}<br>{{ profile.phone }}{% endif %}</dd></div>
+            <div><dt class="text-xs text-ink-500">Experience</dt><dd class="mt-0.5 text-ink-800">{% for e in experiences|slice:":3" %}<span class="block truncate">{{ e.title }} · {{ e.company }}</span>{% empty %}<span class="text-ink-500">No roles yet</span>{% endfor %}{% if experiences|length > 3 %}<span class="text-xs text-ink-500">+{{ experiences|length|add:"-3" }} more</span>{% endif %}</dd></div>
+          </dl>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="h-gen">
+        <div class="card-header"><h2 id="h-gen" class="section-title">2. Choose what to create</h2></div>
+        <form method="post" action="{% url 'cvs:builder_generate' %}" class="card-body space-y-5" data-loading>{% csrf_token %}
+          {% if form.non_field_errors %}<div class="alert-error">{{ form.non_field_errors }}</div>{% endif %}
+          <fieldset>
+            <legend class="sr-only">CV type</legend>
+            <div class="grid gap-3 sm:grid-cols-2" data-mode-group>
+              {% for value, label in form.fields.mode.choices %}
+              <label class="flex cursor-pointer gap-3 rounded-lg border border-line-strong bg-white p-4 transition-colors hover:border-ink-300 has-[:checked]:border-brand-600 has-[:checked]:bg-brand-50/50 has-[:checked]:ring-1 has-[:checked]:ring-brand-600">
+                <input type="radio" name="mode" value="{{ value }}" class="mt-0.5 h-4 w-4 border-line-strong text-brand-700 focus:ring-brand-600" {% if form.mode.value == value %}checked{% endif %}>
+                <span>
+                  <span class="block text-sm font-semibold text-ink-900">{{ label }}</span>
+                  <span class="mt-0.5 block text-[13px] leading-relaxed text-ink-500">{% if value == "general" %}A polished, general-purpose CV from your saved profile.{% else %}Paste a job description for a tailored, ATS-friendly CV that highlights your relevant experience.{% endif %}</span>
+                </span>
+              </label>
+              {% endfor %}
+            </div>
+          </fieldset>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div><label class="label" for="{{ form.target_title.id_for_label }}">Target job title <span class="font-normal text-ink-400">(optional)</span></label>{{ form.target_title }}</div>
+            <div data-jd-only class="{% if form.mode.value != 'jd' %}hidden{% endif %}"><label class="label" for="{{ form.target_company.id_for_label }}">Company <span class="font-normal text-ink-400">(optional)</span></label>{{ form.target_company }}</div>
+          </div>
+          <div data-jd-only class="{% if form.mode.value != 'jd' %}hidden{% endif %}">
+            <label class="label" for="{{ form.job_description.id_for_label }}">Job description</label>
+            {{ form.job_description }}
+            <p class="help">Paste the full listing. Requirements you don't meet are reported to you — never added to your CV.</p>
+            {% for e in form.job_description.errors %}<p class="error">{{ e }}</p>{% endfor %}
+          </div>
+
+          {% if needs_consent %}
+          <div>
+            <label class="flex items-start gap-2 text-[13px] leading-relaxed text-ink-600">{{ form.ai_consent }} <span>{{ form.ai_consent.label }}</span></label>
+            {% for e in form.ai_consent.errors %}<p class="error">{{ e }}</p>{% endfor %}
+          </div>
+          {% endif %}
+
+          <div class="flex flex-wrap items-center justify-between gap-3 border-t border-line pt-5">
+            <p class="text-[13px] text-ink-500">Uses <strong class="font-medium text-ink-800">1 credit</strong> · you have <strong class="font-medium text-ink-800">{{ balance }}</strong></p>
+            {% if balance < 1 %}
+            <a href="#credits" class="btn-primary">Get credits to continue</a>
+            {% else %}
+            <button class="btn-primary" type="submit" data-loading-text="Writing your CV… this takes up to a minute" {% if problems or not ai_configured %}disabled{% endif %}>Generate CV</button>
+            {% endif %}
+          </div>
+        </form>
+      </section>
+    {% else %}
+      <section class="card card-body">
+        <div class="grid gap-6 sm:grid-cols-2">
+          <div><p class="text-sm font-semibold text-ink-900">Create a CV</p><p class="mt-1 text-sm leading-relaxed text-ink-500">Turn the experience you save once into a polished, general-purpose CV.</p></div>
+          <div><p class="text-sm font-semibold text-ink-900">Create CV from job description</p><p class="mt-1 text-sm leading-relaxed text-ink-500">Paste a listing to get a tailored, ATS-friendly CV that brings your relevant experience forward.</p></div>
+        </div>
+        <div class="mt-6 flex flex-wrap gap-3 border-t border-line pt-5">
+          <a href="{% url 'accounts:register' %}" class="btn-primary">Create an account to start</a>
+          <a href="{% url 'accounts:login' %}?next={% url 'cvs:builder' %}" class="btn-secondary">Log in</a>
+        </div>
+      </section>
+    {% endif %}
+
+      <section id="credits" class="scroll-mt-24" aria-labelledby="h-credits">
+        <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
+          <h2 id="h-credits" class="section-title">Credits</h2>
+          {% if payment_mode == "test" %}<span class="badge-amber">Test mode — no real payment is taken</span>
+          {% elif payment_mode == "stripe_test" %}<span class="badge-amber">Stripe test mode — use card 4242 4242 4242 4242</span>
+          {% elif payment_mode == "live" %}<span class="text-xs text-ink-500">Secure checkout by Stripe</span>{% endif %}
+        </div>
+        {% if payment_mode == "off" %}<div class="alert-warn mb-3">Online payments aren't set up yet, so credits can't be bought right now.</div>{% endif %}
+        <div class="grid gap-3 sm:grid-cols-3">
+          {% for pack in packs %}
+          <div class="card card-body flex flex-col {% if forloop.counter == 2 %}ring-1 ring-ink-900{% endif %}">
+            <div class="flex items-center justify-between"><p class="text-sm font-medium text-ink-700">{{ pack.label }}</p>{% if forloop.counter == 2 %}<span class="badge-slate">Popular</span>{% endif %}</div>
+            <p class="mt-2 text-2xl font-semibold tabular-nums text-ink-900">{{ pack.price_display }}</p>
+            <p class="text-[13px] text-ink-500">{{ pack.credits }} CV{{ pack.credits|pluralize }} · {{ pack.per_credit_display }} each</p>
+            {% if user.is_authenticated %}
+            <form method="post" action="{% url 'cvs:buy_credits' pack.code %}" class="mt-4">{% csrf_token %}
+              <button class="{% if forloop.counter == 2 %}btn-dark{% else %}btn-secondary{% endif %} w-full" type="submit" {% if payment_mode == "off" %}disabled{% endif %}>{% if payment_mode == "test" %}Add test credits{% else %}Buy{% endif %}</button>
+            </form>
+            {% else %}
+            <a href="{% url 'accounts:login' %}?next={% url 'cvs:builder' %}" class="btn-secondary mt-4 w-full">Log in to buy</a>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+        <p class="mt-3 text-xs text-ink-500">One credit = one generated CV (either type). Editing and downloading it as PDF or Word is free. If generation fails, the credit is returned automatically.</p>
+      </section>
+    </div>
+
+    <aside class="space-y-4">
+      <div class="card card-body text-sm">
+        <p class="section-title">What it will and won't do</p>
+        <ul class="mt-3 space-y-2.5 text-ink-600">
+          <li class="flex gap-2"><span class="text-emerald-600" aria-hidden="true">✓</span>Rewrite your role descriptions clearly and concisely</li>
+          <li class="flex gap-2"><span class="text-emerald-600" aria-hidden="true">✓</span>Order your most relevant experience and skills first</li>
+          <li class="flex gap-2"><span class="text-emerald-600" aria-hidden="true">✓</span>Keep a simple, single-column layout that ATS software reads</li>
+          <li class="flex gap-2"><span class="text-red-500" aria-hidden="true">✕</span>Invent employers, titles, dates, skills, numbers or achievements</li>
+          <li class="flex gap-2"><span class="text-red-500" aria-hidden="true">✕</span>Store your generated CV files — they're created on demand</li>
+        </ul>
+      </div>
+      <p class="px-1 text-xs leading-relaxed text-ink-500">Always read your CV before sending it. AI can still phrase things in ways you'd change.</p>
+    </aside>
+  </div>
+</div>
+{% endblock %}

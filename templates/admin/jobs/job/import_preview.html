@@ -1,0 +1,71 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls %}
+{% block extrastyle %}{{ block.super }}
+<style>
+  .imp-summary { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; padding: 0; list-style: none; }
+  .imp-summary li { border: 1px solid var(--hairline-color); border-radius: 8px; padding: 8px 14px; min-width: 90px; }
+  .imp-summary strong { display: block; font-size: 20px; }
+  .imp-tag { padding: 1px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .imp-new { background: #e6f6ee; color: #0e7a4f; } .imp-update { background: #e9eaff; color: #3d3a9a; }
+  .imp-unchanged, .imp-duplicate { background: #efefed; color: #555553; } .imp-error { background: #fde8e8; color: #b91c1c; }
+  .imp-table td { vertical-align: top; } .imp-warn { color: #9a6700; } .imp-err { color: #b91c1c; }
+</style>
+{% endblock %}
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">{% translate 'Home' %}</a> › <a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a> › <a href="{% url 'admin:jobs_job_import' %}">Import from Excel</a> › Preview</div>
+{% endblock %}
+{% block content %}
+<div id="content-main">
+  <p><strong>Nothing has been saved yet.</strong> Mode: <strong>{{ run.get_mode_display }}</strong>. {{ summary.total }} row{{ summary.total|pluralize }} read from <code>{{ run.filename }}</code>.</p>
+  <ul class="imp-summary">
+    <li><strong>{{ summary.added }}</strong>will be added</li>
+    <li><strong>{{ summary.updated }}</strong>will be updated</li>
+    <li><strong>{{ summary.skipped }}</strong>skipped <small>({{ summary.unchanged }} unchanged, {{ summary.duplicates }} repeated)</small></li>
+    <li><strong>{{ summary.rejected }}</strong>rejected</li>
+    {% if is_snapshot %}<li><strong>{{ summary.closing }}</strong>will be closed</li>{% endif %}
+  </ul>
+
+  {% if is_snapshot and summary.rejected %}
+  <p class="errornote">A full snapshot can't run while rows are rejected, because a job on a rejected row would be closed by mistake. Fix those rows and upload again, or cancel and upload in “Add &amp; update” mode.</p>
+  {% endif %}
+
+  {% if is_snapshot and to_close %}
+  <h2>{{ to_close|length }} open listing{{ to_close|pluralize }} not in this file will be closed</h2>
+  <ul>{% for job in to_close|slice:":100" %}<li>#{{ job.pk }} <a href="{% url 'admin:jobs_job_change' job.pk %}">{{ job.title }}</a> — {{ job.platform.name }}</li>{% endfor %}</ul>
+  {% if to_close|length > 100 %}<p>…and {{ to_close|length|add:"-100" }} more.</p>{% endif %}
+  {% endif %}
+
+  <form method="post">{% csrf_token %}
+    {% if is_snapshot and to_close %}
+    <p><label><input type="checkbox" name="close_confirmed" value="1" required> Yes, close these {{ to_close|length }} listing{{ to_close|pluralize }}.</label>
+    <input type="hidden" name="confirm_close" value="{{ to_close|length }}"></p>
+    {% elif is_snapshot %}<input type="hidden" name="close_confirmed" value="1"><input type="hidden" name="confirm_close" value="0">{% endif %}
+    <div class="submit-row">
+      <input type="submit" class="default" name="action" value="Import {{ summary.added|add:summary.updated }} job{{ summary.added|add:summary.updated|pluralize }}"{% if is_snapshot and summary.rejected %} disabled{% endif %}>
+      <button type="submit" name="action" value="cancel" formnovalidate class="button cancel-link">Cancel</button>
+    </div>
+  </form>
+
+  <h2>Rows</h2>
+  <table class="imp-table" style="width:100%">
+    <thead><tr><th>Row</th><th>Result</th><th>Title</th><th>Platform</th><th>Details</th></tr></thead>
+    <tbody>
+    {% for r in results %}
+      <tr>
+        <td>{{ r.number }}</td>
+        <td><span class="imp-tag imp-{{ r.status }}">{% if r.status == "new" %}Add{% elif r.status == "update" %}Update{% elif r.status == "unchanged" %}Unchanged{% elif r.status == "duplicate" %}Repeated{% else %}Rejected{% endif %}</span></td>
+        <td>{% if r.existing %}<a href="{% url 'admin:jobs_job_change' r.existing.pk %}">{{ r.title|truncatechars:70 }}</a> <small>#{{ r.existing.pk }}</small>{% else %}{{ r.title|truncatechars:70|default:"—" }}{% endif %}</td>
+        <td>{% if r.platform %}{{ r.platform.name }}{% else %}{{ r.data.platform|default:"—" }}{% endif %}</td>
+        <td>
+          {% for e in r.errors %}<div class="imp-err">{{ e }}</div>{% endfor %}
+          {% if r.changes %}<div>Changes: {{ r.changes|join:", " }}</div>{% endif %}
+          {% if r.note %}<div>{{ r.note }}</div>{% endif %}
+          {% for w in r.warnings %}<div class="imp-warn">{{ w }}</div>{% endfor %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% if hidden_rows %}<p>{{ hidden_rows }} more row{{ hidden_rows|pluralize }} not shown (unchanged or repeated rows are listed last).</p>{% endif %}
+</div>
+{% endblock %}

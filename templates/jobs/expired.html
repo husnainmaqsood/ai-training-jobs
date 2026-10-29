@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block robots %}<meta name="robots" content="noindex">{% endblock %}
+{% block content %}
+<div class="container-page max-w-xl py-16 text-center">
+  <h1 class="page-title">This listing is no longer available</h1>
+  <p class="mt-2 text-ink-600">“{{ job.title }}” at {{ job.display_company }} has expired or been closed.</p>
+  <div class="mt-6 flex justify-center gap-3">
+    <a class="btn-primary" href="{% url 'jobs:list' %}{% if job.category %}?category={{ job.category.slug }}{% endif %}">See similar open jobs</a>
+    <a class="btn-secondary" href="{{ job.platform.get_absolute_url }}">More from {{ job.platform.name }}</a>
+  </div>
+</div>
+{% endblock %}

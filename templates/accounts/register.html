@@ -1,0 +1,10 @@
+{% extends "accounts/_auth_shell.html" %}
+{% block auth_title %}Create your account{% endblock %}
+{% block auth_subtitle %}Free to browse and save jobs. The CV builder uses credits.{% endblock %}
+{% block auth_body %}
+<form method="post" class="field-group">{% csrf_token %}
+  {% include "partials/form_fields.html" %}
+  <button class="btn-primary w-full" type="submit">Create account</button>
+</form>
+{% endblock %}
+{% block auth_footer %}Already have an account? <a href="{% url 'accounts:login' %}" class="font-medium">Log in</a>{% endblock %}

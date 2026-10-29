@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page max-w-3xl py-8">
+  <nav class="mb-4 text-sm"><a href="{{ gcv.get_absolute_url }}">← Back to preview</a></nav>
+  <h1 class="page-title">Edit tailored CV</h1>
+  <p class="muted mt-1">Edit wording freely. Employers, job titles, dates and education come from your master CV — to change those, <a href="{{ gcv.request.master_cv.get_absolute_url }}">edit your master CV</a> and generate again.</p>
+  <form method="post" class="mt-6 space-y-6">{% csrf_token %}
+    <div class="card card-body space-y-4">
+      <div><label class="label" for="headline">Headline</label><input id="headline" name="headline" class="input" value="{{ cv.headline }}" maxlength="200"></div>
+      <div><label class="label" for="summary">Professional summary</label><textarea id="summary" name="summary" rows="5" class="textarea">{{ cv.summary }}</textarea></div>
+      <div><label class="label" for="skills">Skills</label><textarea id="skills" name="skills" rows="3" class="textarea">{{ cv.skills|join:", " }}</textarea><p class="help">Comma separated, most relevant first.</p></div>
+    </div>
+    {% if cv.experience %}
+    <div class="card card-body space-y-5">
+      <h2 class="section-title">Experience</h2>
+      {% for e in cv.experience %}
+      <div><label class="label" for="exp_{{ e.id }}">{{ e.title }} — {{ e.employer }} <span class="font-normal text-ink-500">{{ e.start_date }}{% if e.end_date %}–{{ e.end_date }}{% endif %}</span></label>
+        <textarea id="exp_{{ e.id }}" name="exp_{{ e.id }}" rows="5" class="textarea text-sm">{% for b in e.bullets %}{{ b }}
+{% endfor %}</textarea><p class="help">One bullet per line.</p></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if cv.projects %}
+    <div class="card card-body space-y-5">
+      <h2 class="section-title">Projects</h2>
+      {% for p in cv.projects %}
+      <div><label class="label" for="projdesc_{{ p.id }}">{{ p.name }} — description</label><input id="projdesc_{{ p.id }}" name="projdesc_{{ p.id }}" class="input" value="{{ p.description }}">
+        <label class="label mt-2" for="proj_{{ p.id }}">Bullets</label><textarea id="proj_{{ p.id }}" name="proj_{{ p.id }}" rows="3" class="textarea text-sm">{% for b in p.bullets %}{{ b }}
+{% endfor %}</textarea></div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <div class="flex gap-3"><button class="btn-primary" type="submit">Save changes</button><a href="{{ gcv.get_absolute_url }}" class="btn-secondary">Cancel</a></div>
+  </form>
+</div>
+{% endblock %}

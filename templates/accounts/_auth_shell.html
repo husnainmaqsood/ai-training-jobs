@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page flex justify-center py-12 sm:py-16">
+  <div class="w-full max-w-[400px]">
+    <h1 class="text-[22px] font-semibold tracking-tight">{% block auth_title %}{% endblock %}</h1>
+    <p class="mt-1.5 text-sm text-ink-500">{% block auth_subtitle %}{% endblock %}</p>
+    <div class="card card-body mt-6">{% block auth_body %}{% endblock %}</div>
+    <div class="mt-5 text-sm text-ink-600">{% block auth_footer %}{% endblock %}</div>
+  </div>
+</div>
+{% endblock %}

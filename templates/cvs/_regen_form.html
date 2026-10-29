@@ -1,0 +1,9 @@
+<details class="mt-1 text-xs">
+  <summary class="cursor-pointer text-brand-700 hover:underline">↻ Regenerate this section</summary>
+  <form method="post" action="{% url 'cvs:generated_regenerate' gcv.public_id %}" class="mt-2 flex flex-col gap-2 sm:flex-row">{% csrf_token %}
+    <input type="hidden" name="section" value="{{ section }}"><input type="hidden" name="item_id" value="{{ item_id }}">
+    <label class="sr-only" for="instr-{{ section }}-{{ item_id }}">Instruction</label>
+    <input id="instr-{{ section }}-{{ item_id }}" name="instruction" maxlength="300" class="input py-1.5 text-xs" placeholder="Optional: e.g. 'more concise', 'emphasise leadership'">
+    <button class="btn-secondary btn-sm" type="submit">Regenerate</button>
+  </form>
+</details>

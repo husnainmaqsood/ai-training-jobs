@@ -1,0 +1,18 @@
+<div class="card card-body text-center">
+  {% if gen.status == "failed" %}
+    <p class="text-lg font-semibold text-red-700">Generation failed</p>
+    <p class="mt-2 text-sm text-ink-600">{{ gen.error_message|default:"Something went wrong." }}</p>
+    {% if gen.quota_refunded %}<p class="mt-1 text-xs text-emerald-700">Your generation allowance was refunded.</p>{% endif %}
+    <div class="mt-5 flex justify-center gap-3">
+      <form method="post" action="{% url 'cvs:generation_retry' gen.public_id %}">{% csrf_token %}<button class="btn-primary" type="submit">Try again</button></form>
+      <a class="btn-secondary" href="{% url 'cvs:tailor' %}">Edit inputs</a>
+    </div>
+  {% elif gen.status == "succeeded" %}
+    <p class="font-semibold">Done! <a href="{{ gen.get_absolute_url }}">View your tailored CV →</a></p>
+  {% else %}
+    <div class="mx-auto h-10 w-10 animate-spin rounded-full border-4 border-brand-200 border-t-brand-600" aria-hidden="true"></div>
+    <p class="mt-4 font-medium" role="status">{{ gen.progress_message|default:"Queued" }}…</p>
+    <p class="mt-1 text-xs text-ink-500">This usually takes 20–60 seconds. You can leave this page; the result will appear in your history.</p>
+    <noscript><p class="mt-3 text-sm"><a href="{{ gen.get_absolute_url }}">Refresh</a></p></noscript>
+  {% endif %}
+</div>

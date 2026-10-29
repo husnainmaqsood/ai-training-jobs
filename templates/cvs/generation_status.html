@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page max-w-xl py-16">
+  <h1 class="text-center text-2xl font-bold">Tailoring “{{ gen.target_title }}”</h1>
+  <div id="progress" class="mt-8" {% if not gen.is_finished %}hx-get="{% url 'cvs:generation_status' gen.public_id %}" hx-trigger="every 2s" hx-swap="innerHTML"{% endif %}>
+    {% include "cvs/_generation_progress.html" %}
+  </div>
+</div>
+{% endblock %}

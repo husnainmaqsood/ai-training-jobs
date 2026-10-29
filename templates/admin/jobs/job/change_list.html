@@ -1,0 +1,8 @@
+{% extends "admin/change_list.html" %}
+{% block object-tools-items %}
+  {% if has_add_permission %}
+  <li><a href="{% url 'admin:jobs_job_import' %}" class="addlink">Import from Excel</a></li>
+  <li><a href="{% url 'admin:jobs_importrun_changelist' %}?source__isempty=1">Import history</a></li>
+  {% endif %}
+  {{ block.super }}
+{% endblock %}

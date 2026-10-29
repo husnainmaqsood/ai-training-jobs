@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-page max-w-lg py-16 text-center">
+  <h1 class="page-title">Checkout cancelled</h1>
+  <p class="mt-3 text-ink-600">No payment was taken. You can subscribe any time.</p>
+  <a href="{% url 'billing:pricing' %}" class="btn-primary mt-6">Back to pricing</a>
+</div>
+{% endblock %}

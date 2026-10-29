@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% load ui %}
+{% block content %}
+<div class="container-page py-8">
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div><h1 class="page-title">Application tracker</h1>
+      <p class="muted">{{ count }} of {{ plan.max_applications }} tracked on {{ plan.name }}. You apply on each employer's site — this tracker records your progress.</p></div>
+    <a href="{% url 'tracker:create' %}" class="btn-primary">+ Add application</a>
+  </div>
+  {% if count %}
+  <div class="mt-6 flex gap-4 overflow-x-auto pb-4">
+    {% for value, label, items in columns %}
+    <section class="w-64 shrink-0 rounded-2xl bg-ink-100 p-3" aria-label="{{ label }}">
+      <h2 class="mb-3 flex items-center justify-between text-sm font-semibold text-ink-700">{{ label }} <span class="badge-slate bg-white">{{ items|length }}</span></h2>
+      <div class="space-y-2">{% for a in items %}{% include "tracker/_card.html" %}{% empty %}<p class="text-xs text-ink-400">Nothing here</p>{% endfor %}</div>
+    </section>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card card-body mt-6 text-center">
+    <p class="text-ink-600">No applications yet. Use “Track application” on any job, or add one manually.</p>
+    <div class="mt-4 flex justify-center gap-3"><a href="{% url 'jobs:list' %}" class="btn-primary">Find jobs</a><a href="{% url 'tracker:create' %}" class="btn-secondary">Add manually</a></div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
